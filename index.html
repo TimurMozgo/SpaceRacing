@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SpaceRacing - TINELAB</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Start Screen -->
+        <div class="screen start-screen active" id="startScreen">
+            <div class="space-background">
+                <div class="stars"></div>
+                <div class="planets">
+                    <div class="planet planet-1"></div>
+                    <div class="planet planet-2"></div>
+                </div>
+            </div>
+            
+            <div class="logo-container">
+                <div class="ufo">
+                    <div class="ufo-light"></div>
+                </div>
+                <h1 class="game-title">
+                    <span class="title-space">SPACE</span>
+                    <span class="title-racing">RACING</span>
+                </h1>
+                <div class="asteroids-floating">
+                    <div class="asteroid asteroid-1"></div>
+                    <div class="asteroid asteroid-2"></div>
+                    <div class="asteroid asteroid-3"></div>
+                </div>
+            </div>
+            
+            <button class="btn-start pulse-animation" onclick="game.showShipSelection()">
+                <span>START</span>
+                <div class="btn-glow"></div>
+            </button>
+            
+            <div class="tinelab-credit">
+                <span>Created by </span>
+                <span class="tinelab-logo">TINELAB</span>
+            </div>
+        </div>
+
+        <!-- Ship Selection Screen -->
+        <div class="screen ship-selection" id="shipSelection">
+            <div class="screen-header">
+                <button class="btn-back" onclick="game.showStartScreen()">←</button>
+                <h2>Select Spaceship</h2>
+                <div class="currency">
+                    <span class="coin-icon">🪙</span>
+                    <span id="coinCount">1500</span>
+                </div>
+            </div>
+            
+            <div class="ships-container" id="shipsContainer">
+                <!-- Ships render via JS -->
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="screen game-screen" id="gameScreen">
+            <div class="game-header">
+                <div class="score-container">
+                    <span class="score-label">SCORE</span>
+                    <span class="score-value" id="score">0</span>
+                </div>
+                <div class="currency">
+                    <span class="coin-icon">🪙</span>
+                    <span id="gameCoins">1500</span>
+                </div>
+            </div>
+            
+            <div class="game-area" id="gameArea">
+                <div class="game-background">
+                    <div class="stars-game"></div>
+                </div>
+                <div class="player-ship" id="playerShip"></div>
+                <div class="obstacles-container" id="obstacles"></div>
+                <div class="coins-container" id="coins"></div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div class="screen game-over" id="gameOver">
+            <div class="game-over-content">
+                <div class="explosion"></div>
+                <h2>GAME OVER</h2>
+                <div class="final-score">
+                    <span class="label">Score</span>
+                    <span class="value" id="finalScore">0</span>
+                </div>
+                <div class="coins-collected">
+                    <span class="coin-icon">🪙</span>
+                    <span>+<span id="collectedCoins">0</span></span>
+                </div>
+                <div class="next-life">
+                    <span>Next Life in </span>
+                    <span class="timer" id="respawnTimer">5s</span>
+                </div>
+                <div class="game-over-buttons">
+                    <button class="btn-home" onclick="game.showStartScreen()">HOME</button>
+                    <button class="btn-store" onclick="game.showShop()">STORE</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pause Screen -->
+        <div class="screen pause-screen" id="pauseScreen">
+            <div class="pause-content">
+                <h2>PAUSE</h2>
+                <div class="pause-buttons">
+                    <button class="btn-resume" onclick="game.resume()">RESUME</button>
+                    <button class="btn-settings" onclick="game.showSettings()">SETTINGS</button>
+                    <button class="btn-home-pause" onclick="game.showStartScreen()">HOME</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level Complete -->
+        <div class="screen level-complete" id="levelComplete">
+            <div class="complete-content">
+                <div class="stars-reward">
+                    <div class="star big"></div>
+                    <div class="star big"></div>
+                    <div class="star big"></div>
+                </div>
+                <h2>LEVEL COMPLETE!</h2>
+                <div class="reward-box">
+                    <div class="box-icon">🎁</div>
+                    <span>YOU GOT A REWARD</span>
+                </div>
+                <div class="reward-coins">
+                    <span class="coin-icon">🪙</span>
+                    <span>+300</span>
+                </div>
+                <button class="btn-next" onclick="game.nextLevel()">NEXT</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
