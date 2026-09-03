@@ -29,6 +29,9 @@ class SpaceRacing {
         this.gameWidth = 0;
         this.gameHeight = 0;
         
+        // Таймер респавна (ДОБАВЛЕНО)
+        this.respawnTimerId = null;
+        
         // Данные о кораблях
         this.ships = {
             1: { name: 'Spaceship #1', price: 0, unlocked: true, stars: 2 },
@@ -170,7 +173,7 @@ class SpaceRacing {
         Object.keys(this.ships).forEach(shipId => {
             const ship = this.ships[shipId];
             const card = document.createElement('div');
-            card.className = 'ship-card';
+            card.className = `ship-card ship-card-${shipId}`;
             card.dataset.ship = shipId;
             
             if (ship.unlocked && shipId == this.selectedShip) {
@@ -180,19 +183,13 @@ class SpaceRacing {
                 card.classList.add('locked');
             }
             
-            let starsHtml = '';
-            for (let i = 0; i < ship.stars; i++) {
-                starsHtml += '<div class="star rated"></div>';
-            }
-            
             card.innerHTML = `
                 <div class="ship-preview ship-${shipId}"></div>
                 <h3>${ship.name}</h3>
-                <div class="ship-stats">${starsHtml}</div>
                 ${!ship.unlocked ? `
                     <div class="lock-overlay">
-                        <span class="lock-icon"></span>
-                        <span class="price">${ship.price} 🪙</span>
+                        <span class="lock-icon">🔒</span>
+                        <span class="price">${ship.price} </span>
                     </div>
                 ` : ''}
             `;
@@ -294,9 +291,12 @@ class SpaceRacing {
     }
     
     showStartScreen() {
+        this.clearRespawnTimer(); // Очищаем таймер
         this.showScreen('startScreen');
         this.stopGame();
     }
+
+
     
     updateShipAppearance() {
         const playerShip = document.getElementById('playerShip');
@@ -502,6 +502,13 @@ class SpaceRacing {
             }
         }, 500);
     }
+
+    clearRespawnTimer() {
+        if (this.respawnTimerId) {
+            clearInterval(this.respawnTimerId);
+            this.respawnTimerId = null;
+        }
+    }
     
     gameOver() {
         this.isPlaying = false;
@@ -517,14 +524,15 @@ class SpaceRacing {
         let timeLeft = 5;
         const respawnTimer = document.getElementById('respawnTimer');
         
-        const timer = setInterval(() => {
+        // Сохраняем ID таймера в this.respawnTimerId
+        this.respawnTimerId = setInterval(() => {
             timeLeft--;
             if (respawnTimer) {
                 respawnTimer.textContent = timeLeft + 's';
             }
             
             if (timeLeft <= 0) {
-                clearInterval(timer);
+                this.clearRespawnTimer(); // Очищаем таймер
                 this.showStartScreen();
             }
         }, 1000);
@@ -548,13 +556,17 @@ class SpaceRacing {
     }
     
     togglePause() {
+        if (!this.isPlaying) return; // Не паузим если игра не идет
+        
         this.isPaused = !this.isPaused;
         
         if (this.isPaused) {
             this.showScreen('pauseScreen');
-        } else {
-            this.showScreen('gameScreen');
-            this.lastTime = performance.now();
+            
+            // Вибрация при паузе (для телефона)
+            if (this.tg && this.tg.HapticFeedback) {
+                this.tg.HapticFeedback.impactOccurred('light');
+            }
         }
     }
     
@@ -569,6 +581,7 @@ class SpaceRacing {
     }
     
     showShop() {
+        this.clearRespawnTimer(); // Очищаем таймер
         this.showScreen('shipSelection');
         this.renderShips();
     }
