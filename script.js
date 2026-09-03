@@ -14,8 +14,8 @@ class SpaceRacing {
         this.gameCoins = [];
         this.animationId = null;
         this.lastTime = 0;
-        this.spawnTimer = 0;
-        this.coinTimer = 0;
+        this.lastObstacleSpawn = 0;
+        this.lastCoinSpawn = 0;
         this.distance = 0;
         this.level = 1;
         
@@ -258,35 +258,39 @@ class SpaceRacing {
     
     startGame() {
         console.log('🎮 Starting game...');
-        
-        // Сначала показываем экран
         this.showScreen('gameScreen');
         
-        // Ждем пока экран станет видимым
+        // Увеличиваем задержку до 600мс и делаем двойную проверку
         setTimeout(() => {
             const gameArea = document.getElementById('gameArea');
-            if (gameArea) {
-                const rect = gameArea.getBoundingClientRect();
-                this.gameWidth = rect.width || gameArea.offsetWidth || 375;
-                this.gameHeight = rect.height || gameArea.offsetHeight || 600;
-                
-                console.log('✅ Game area:', this.gameWidth, 'x', this.gameHeight);
-                
-                // Теперь запускаем игру
-                this.resetGame();
-                this.isPlaying = true;
-                this.isPaused = false;
-                this.lastTime = performance.now();
-                
-                this.currentShipX = 50;
-                this.targetShipX = 50;
-                this.touchActive = false;
-                
-                this.gameLoop();
-            } else {
-                console.error('❌ Game area not found!');
+            if (!gameArea) {
+                console.error('❌ GameArea NOT FOUND!');
+                return;
             }
-        }, 300);
+            
+            const rect = gameArea.getBoundingClientRect();
+            this.gameWidth = rect.width || 375;
+            this.gameHeight = rect.height || 600;
+            
+            // ПРИНУДИТЕЛЬНО ставим минимальную высоту 500px
+            if (this.gameHeight < 500) {
+                console.warn('⚠️ gameHeight too small:', this.gameHeight, '- forcing 500px');
+                this.gameHeight = 500;
+            }
+            
+            console.log('✅ Game area:', this.gameWidth, 'x', this.gameHeight);
+            
+            this.resetGame();
+            this.isPlaying = true;
+            this.isPaused = false;
+            this.lastTime = performance.now();
+            
+            this.currentShipX = 50;
+            this.targetShipX = 50;
+            this.touchActive = false;
+            
+            this.gameLoop();
+        }, 600);
     }
     
     showStartScreen() {
@@ -315,8 +319,8 @@ class SpaceRacing {
         this.gameSpeed = this.baseGameSpeed + (this.level * 0.5);
         this.obstacles = [];
         this.gameCoins = [];
-        this.spawnTimer = 0;
-        this.coinTimer = 0;
+        this.lastObstacleSpawn = Date.now();
+        this.lastCoinSpawn = Date.now();
         
         const obstaclesContainer = document.getElementById('obstacles');
         const coinsContainer = document.getElementById('coins');
@@ -341,18 +345,19 @@ class SpaceRacing {
         this.lastTime = currentTime;
         
         if (!this.isPaused) {
-            this.update(deltaTime);
+            this.update();
             this.updateShipPosition();
         }
         
         this.animationId = requestAnimationFrame((time) => this.gameLoop(time));
     }
     
-    update(deltaTime) {
+    update() {
         this.distance += this.gameSpeed * 0.1;
         this.score = Math.floor(this.distance);
         this.updateScore();
         
+        // Плавное увеличение скорости
         this.gameSpeed = this.baseGameSpeed + (this.level * 0.5) + (this.distance * 0.002);
         
         const progress = (this.distance % 1000) / 1000 * 100;
@@ -361,16 +366,19 @@ class SpaceRacing {
             progressFill.style.width = progress + '%';
         }
         
-        this.spawnTimer += deltaTime;
-        if (this.spawnTimer > 1000) {
+        // ЖЕСТКИЙ СПАВН ЧЕРЕЗ DATE.NOW()
+        const now = Date.now();
+        
+        // Препятствия каждые 1000мс (1 секунда)
+        if (now - this.lastObstacleSpawn > 1000) {
             this.spawnObstacle();
-            this.spawnTimer = 0;
+            this.lastObstacleSpawn = now;
         }
         
-        this.coinTimer += deltaTime;
-        if (this.coinTimer > 800) {
+        // Монеты каждые 700мс
+        if (now - this.lastCoinSpawn > 700) {
             this.spawnCoin();
-            this.coinTimer = 0;
+            this.lastCoinSpawn = now;
         }
         
         this.updateObstacles();
