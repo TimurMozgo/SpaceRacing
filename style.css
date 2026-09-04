@@ -435,6 +435,7 @@ body {
     flex: 1;
 }
 
+/* ===== БАЗОВЫЙ СТИЛЬ КАРТОЧКИ ===== */
 .ship-card {
     background: linear-gradient(135deg, rgba(40, 40, 40, 0.6) 0%, rgba(20, 20, 20, 0.8) 100%);
     border: 2px solid var(--border-light);
@@ -445,90 +446,6 @@ body {
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-}
-
-/* Базовый стиль карточки */
-.ship-card {
-    background: linear-gradient(135deg, rgba(40, 40, 40, 0.6) 0%, rgba(20, 20, 20, 0.8) 100%);
-    border: 2px solid var(--border-light);
-    border-radius: 20px;
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-/* Синяя карточка - Spaceship #1 */
-.ship-card-1 {
-    background: linear-gradient(135deg, rgba(0, 100, 200, 0.15) 0%, rgba(0, 50, 100, 0.3) 100%);
-    border-color: rgba(0, 150, 255, 0.4);
-    box-shadow: 0 0 20px rgba(0, 150, 255, 0.2);
-}
-
-.ship-card-1.active {
-    border-color: #0096FF;
-    box-shadow: 0 0 30px rgba(0, 150, 255, 0.5), inset 0 0 20px rgba(0, 150, 255, 0.1);
-}
-
-.ship-card-1 .ship-preview {
-    filter: drop-shadow(0 0 15px rgba(0, 150, 255, 0.6));
-}
-
-/* Розовая карточка - Spaceship #2 */
-.ship-card-2 {
-    background: linear-gradient(135deg, rgba(200, 0, 150, 0.15) 0%, rgba(100, 0, 75, 0.3) 100%);
-    border-color: rgba(255, 0, 170, 0.4);
-    box-shadow: 0 0 20px rgba(255, 0, 170, 0.2);
-}
-
-.ship-card-2.active {
-    border-color: #FF00AA;
-    box-shadow: 0 0 30px rgba(255, 0, 170, 0.5), inset 0 0 20px rgba(255, 0, 170, 0.1);
-}
-
-.ship-card-2 .ship-preview {
-    filter: drop-shadow(0 0 15px rgba(255, 0, 170, 0.6));
-}
-
-/* Золотая карточка - Spaceship #3 */
-.ship-card-3 {
-    background: linear-gradient(135deg, rgba(255, 200, 0, 0.15) 0%, rgba(150, 100, 0, 0.3) 100%);
-    border-color: rgba(255, 215, 0, 0.4);
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
-}
-
-.ship-card-3.active {
-    border-color: #FFD700;
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.1);
-}
-
-.ship-card-3 .ship-preview {
-    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.6));
-}
-
-/* Заблокированные карточки - приглушенные цвета */
-.ship-card.locked {
-    opacity: 0.5;
-    filter: grayscale(50%);
-}
-
-/* Анимация при наведении */
-.ship-card:not(.locked):hover {
-    transform: translateY(-5px);
-}
-
-.ship-card-1:not(.locked):hover {
-    box-shadow: 0 5px 30px rgba(0, 150, 255, 0.4);
-}
-
-.ship-card-2:not(.locked):hover {
-    box-shadow: 0 5px 30px rgba(255, 0, 170, 0.4);
-}
-
-.ship-card-3:not(.locked):hover {
-    box-shadow: 0 5px 30px rgba(255, 215, 0, 0.4);
 }
 
 .ship-card::before {
@@ -555,8 +472,14 @@ body {
 
 .ship-card.locked {
     opacity: 0.6;
+    filter: grayscale(30%);
 }
 
+.ship-card:not(.locked):hover {
+    transform: translateY(-5px);
+}
+
+/* ===== ПРЕВЬЮ КОРАБЛЯ ===== */
 .ship-preview {
     width: 120px;
     height: 120px;
@@ -565,33 +488,242 @@ body {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    filter: grayscale(100%) brightness(1.1);
     transition: filter 0.3s ease;
+    /* УБРАЛИ grayscale — корабли теперь цветные! */
 }
 
 .ship-card.active .ship-preview {
-    filter: grayscale(0%) brightness(1.2);
+    filter: brightness(1.2);
 }
 
-.ship-1 {
-    background-image: url('./images/ship-1.png') !important;
-    filter: grayscale(100%) brightness(1.1) drop-shadow(0 0 15px rgba(255, 255, 255, 0.5));
+/* ===== КАРТИНКИ КОРАБЛЕЙ (свечение) ===== */
+.ship-1 { background-image: url('./images/ship-1.png') !important; }
+.ship-2 { background-image: url('./images/ship-2.png') !important; }
+.ship-3 { background-image: url('./images/ship-3.png') !important; }
+.ship-4 { background-image: url('./images/ship-4.png') !important; }
+.ship-5 { background-image: url('./images/ship-5.png') !important; }
+.ship-6 { background-image: url('./images/ship-6.png') !important; }
+
+/* ===== ЦВЕТНЫЕ КАРТОЧКИ ===== */
+
+/* #1 Sky Striker - СИНИЙ */
+.ship-card-1 {
+    background: linear-gradient(135deg, rgba(0, 100, 255, 0.12) 0%, rgba(0, 50, 130, 0.25) 100%);
+    border-color: rgba(0, 100, 255, 0.4);
+    box-shadow: 0 0 20px rgba(0, 100, 255, 0.15);
+}
+.ship-card-1.active {
+    border-color: #0064FF;
+    box-shadow: 0 0 30px rgba(0, 100, 255, 0.5), inset 0 0 20px rgba(0, 100, 255, 0.1);
+}
+.ship-card-1:not(.locked):hover {
+    box-shadow: 0 5px 30px rgba(0, 100, 255, 0.4);
+}
+.ship-card-1 .ship-preview {
+    filter: drop-shadow(0 0 15px rgba(0, 100, 255, 0.7));
 }
 
-.ship-2 {
-    background-image: url('./images/ship-2.png') !important;
-    filter: grayscale(100%) brightness(1.1) drop-shadow(0 0 15px rgba(255, 255, 255, 0.5));
+/* #2 Forest Wraith - ИЗУМРУДНЫЙ */
+.ship-card-2 {
+    background: linear-gradient(135deg, rgba(0, 220, 100, 0.12) 0%, rgba(0, 110, 50, 0.25) 100%);
+    border-color: rgba(0, 220, 100, 0.4);
+    box-shadow: 0 0 20px rgba(0, 220, 100, 0.15);
+}
+.ship-card-2.active {
+    border-color: #00DC64;
+    box-shadow: 0 0 30px rgba(0, 220, 100, 0.5), inset 0 0 20px rgba(0, 220, 100, 0.1);
+}
+.ship-card-2:not(.locked):hover {
+    box-shadow: 0 5px 30px rgba(0, 220, 100, 0.4);
+}
+.ship-card-2 .ship-preview {
+    filter: drop-shadow(0 0 15px rgba(0, 220, 100, 0.7));
 }
 
-.ship-3 {
-    background-image: url('./images/ship-3.png') !important;
-    filter: grayscale(100%) brightness(1.1) drop-shadow(0 0 15px rgba(255, 255, 255, 0.5));
+/* #3 Pink Lightning - РОЗОВЫЙ */
+.ship-card-3 {
+    background: linear-gradient(135deg, rgba(255, 0, 170, 0.12) 0%, rgba(130, 0, 85, 0.25) 100%);
+    border-color: rgba(255, 0, 170, 0.4);
+    box-shadow: 0 0 20px rgba(255, 0, 170, 0.15);
+}
+.ship-card-3.active {
+    border-color: #FF00AA;
+    box-shadow: 0 0 30px rgba(255, 0, 170, 0.5), inset 0 0 20px rgba(255, 0, 170, 0.1);
+}
+.ship-card-3:not(.locked):hover {
+    box-shadow: 0 5px 30px rgba(255, 0, 170, 0.4);
+}
+.ship-card-3 .ship-preview {
+    filter: drop-shadow(0 0 15px rgba(255, 0, 170, 0.7));
 }
 
-.ship-card.active .ship-1,
-.ship-card.active .ship-2,
-.ship-card.active .ship-3 {
-    filter: grayscale(0%) brightness(1.2) drop-shadow(0 0 20px rgba(255, 255, 255, 0.7));
+/* #4 Midas Touch - ЗОЛОТОЙ */
+.ship-card-4 {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.12) 0%, rgba(130, 110, 0, 0.25) 100%);
+    border-color: rgba(255, 215, 0, 0.4);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.15);
+}
+.ship-card-4.active {
+    border-color: #FFD700;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.1);
+}
+.ship-card-4:not(.locked):hover {
+    box-shadow: 0 5px 30px rgba(255, 215, 0, 0.4);
+}
+.ship-card-4 .ship-preview {
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.7));
+}
+
+/* #5 Dark Matter - ФИОЛЕТОВЫЙ */
+.ship-card-5 {
+    background: linear-gradient(135deg, rgba(180, 0, 255, 0.12) 0%, rgba(90, 0, 130, 0.25) 100%);
+    border-color: rgba(180, 0, 255, 0.4);
+    box-shadow: 0 0 20px rgba(180, 0, 255, 0.15);
+}
+.ship-card-5.active {
+    border-color: #B400FF;
+    box-shadow: 0 0 30px rgba(180, 0, 255, 0.5), inset 0 0 20px rgba(180, 0, 255, 0.1);
+}
+.ship-card-5:not(.locked):hover {
+    box-shadow: 0 5px 30px rgba(180, 0, 255, 0.4);
+}
+.ship-card-5 .ship-preview {
+    filter: drop-shadow(0 0 20px rgba(180, 0, 255, 0.8));
+}
+
+/* #6 Blood Moon - КРАСНЫЙ */
+.ship-card-6 {
+    background: linear-gradient(135deg, rgba(255, 30, 0, 0.12) 0%, rgba(130, 15, 0, 0.25) 100%);
+    border-color: rgba(255, 30, 0, 0.4);
+    box-shadow: 0 0 20px rgba(255, 30, 0, 0.15);
+}
+.ship-card-6.active {
+    border-color: #FF1E00;
+    box-shadow: 0 0 30px rgba(255, 30, 0, 0.5), inset 0 0 20px rgba(255, 30, 0, 0.1);
+}
+.ship-card-6:not(.locked):hover {
+    box-shadow: 0 5px 30px rgba(255, 30, 0, 0.4);
+}
+.ship-card-6 .ship-preview {
+    filter: drop-shadow(0 0 20px rgba(255, 30, 0, 0.8));
+}
+
+/* ===== АНИМАЦИЯ ВЫБРАННОГО КОРАБЛЯ ===== */
+
+/* Парение корабля */
+@keyframes shipFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Пульсация свечения */
+@keyframes shipGlow {
+    0%, 100% {
+        filter: brightness(1.2) drop-shadow(0 0 20px currentColor);
+    }
+    50% {
+        filter: brightness(1.4) drop-shadow(0 0 35px currentColor);
+    }
+}
+
+/* Активный корабль - парит и светится */
+.ship-card.active .ship-preview {
+    animation: 
+        shipFloat 2s ease-in-out infinite,
+        shipGlow 2s ease-in-out infinite;
+    transform-origin: center;
+}
+
+/* Усиленное свечение для каждого цвета */
+.ship-card-1.active .ship-preview {
+    filter: drop-shadow(0 0 20px rgba(0, 100, 255, 0.9))
+            drop-shadow(0 0 40px rgba(0, 100, 255, 0.6));
+}
+
+.ship-card-2.active .ship-preview {
+    filter: drop-shadow(0 0 20px rgba(0, 220, 100, 0.9))
+            drop-shadow(0 0 40px rgba(0, 220, 100, 0.6));
+}
+
+.ship-card-3.active .ship-preview {
+    filter: drop-shadow(0 0 20px rgba(255, 0, 170, 0.9))
+            drop-shadow(0 0 40px rgba(255, 0, 170, 0.6));
+}
+
+.ship-card-4.active .ship-preview {
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.9))
+            drop-shadow(0 0 40px rgba(255, 215, 0, 0.6));
+}
+
+.ship-card-5.active .ship-preview {
+    filter: drop-shadow(0 0 25px rgba(180, 0, 255, 1))
+            drop-shadow(0 0 50px rgba(180, 0, 255, 0.7));
+}
+
+.ship-card-6.active .ship-preview {
+    filter: drop-shadow(0 0 25px rgba(255, 30, 0, 1))
+            drop-shadow(0 0 50px rgba(255, 30, 0, 0.7));
+}
+
+/* ===== СТИЛИ КОРАБЛЯ В ИГРЕ ===== */
+
+.player-ship.ship-1 {
+    filter: drop-shadow(0 0 15px rgba(0, 100, 255, 0.7));
+}
+
+.player-ship.ship-2 {
+    filter: drop-shadow(0 0 15px rgba(0, 220, 100, 0.7));
+}
+
+.player-ship.ship-3 {
+    filter: drop-shadow(0 0 15px rgba(255, 0, 170, 0.7));
+}
+
+.player-ship.ship-4 {
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.7));
+}
+
+.player-ship.ship-5 {
+    filter: drop-shadow(0 0 20px rgba(180, 0, 255, 0.8));
+}
+
+.player-ship.ship-6 {
+    filter: drop-shadow(0 0 20px rgba(255, 30, 0, 0.8));
+}
+
+/* Усиленное свечение при управлении */
+.player-ship.ship-1.controlled {
+    filter: drop-shadow(0 0 25px rgba(0, 100, 255, 1)) 
+            drop-shadow(0 0 50px rgba(0, 100, 255, 0.6));
+}
+
+.player-ship.ship-2.controlled {
+    filter: drop-shadow(0 0 25px rgba(0, 220, 100, 1)) 
+            drop-shadow(0 0 50px rgba(0, 220, 100, 0.6));
+}
+
+.player-ship.ship-3.controlled {
+    filter: drop-shadow(0 0 25px rgba(255, 0, 170, 1)) 
+            drop-shadow(0 0 50px rgba(255, 0, 170, 0.6));
+}
+
+.player-ship.ship-4.controlled {
+    filter: drop-shadow(0 0 25px rgba(255, 215, 0, 1)) 
+            drop-shadow(0 0 50px rgba(255, 215, 0, 0.6));
+}
+
+.player-ship.ship-5.controlled {
+    filter: drop-shadow(0 0 30px rgba(180, 0, 255, 1)) 
+            drop-shadow(0 0 60px rgba(180, 0, 255, 0.6));
+}
+
+.player-ship.ship-6.controlled {
+    filter: drop-shadow(0 0 30px rgba(255, 30, 0, 1)) 
+            drop-shadow(0 0 60px rgba(255, 30, 0, 0.6));
 }
 
 .ship-card h3 {
@@ -663,9 +795,13 @@ body {
     font-size: 1.1em;
 }
 
-/* Game Screen */
+/* ===== ИГРОВОЙ ЭКРАН И ХЕДЕР ===== */
 .game-screen {
     background: linear-gradient(180deg, #000000 0%, #0A0A0A 100%);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .game-header {
@@ -676,17 +812,23 @@ body {
     background: rgba(255,255,255,0.03);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-light);
+    /* Гарантируем, что хедер не будет сжиматься */
+    flex-shrink: 0; 
+    z-index: 100;
 }
 
+/* Контейнер счета - фиксируем ширину */
 .score-container {
     display: flex;
     flex-direction: column;
+    min-width: 90px; /* Жесткая минимальная ширина */
 }
 
 .score-label {
     color: var(--text-muted);
     font-size: 0.8em;
     letter-spacing: 2px;
+    margin-bottom: 2px;
 }
 
 .score-value {
@@ -695,12 +837,55 @@ body {
     font-size: 1.5em;
     font-weight: 700;
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    /* МАГИЯ: все цифры занимают одинаковую ширину, текст не прыгает */
+    font-variant-numeric: tabular-nums; 
+    min-width: 60px;
 }
 
-/* Кнопка звука */
-.btn-sound {
+/* Контейнер монет - фиксируем ширину и отодвигаем вправо */
+.currency {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 215, 0, 0.1);
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 2px solid rgba(255, 215, 0, 0.5);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    min-width: 110px; /* Жесткая минимальная ширина */
+    justify-content: center;
+    /* Отодвигаем монеты и кнопки вправо, оставляя счет слева */
+    margin-left: auto; 
+    margin-right: 10px;
+}
+
+.coin-icon {
+    font-size: 1.2em;
+    display: inline-block;
+    width: 20px;
+    text-align: center;
+    /* Убираем любое дерганье эмодзи */
+    line-height: 1; 
+}
+
+.currency span:last-child {
+    color: #FFD700;
+    font-weight: 700;
+    font-size: 1.1em;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    min-width: 45px; /* Фиксируем место под цифры */
+    text-align: right;
+    /* МАГИЯ: цифры не прыгают при изменении счета */
+    font-variant-numeric: tabular-nums; 
+}
+
+/* ===== КНОПКИ (ЖЕСТКАЯ ФИКСАЦИЯ) ===== */
+.btn-sound,
+.btn-pause {
     width: 48px;
     height: 48px;
+    min-width: 48px;  /* ЗАПРЕТ на сжатие по ширине */
+    flex-shrink: 0;    /* ЗАПРЕТ на сжатие flex-контейнером */
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
@@ -711,10 +896,21 @@ body {
     justify-content: center;
     transition: all 0.2s ease;
     backdrop-filter: blur(10px);
+}
+
+/* Отступ только между кнопками, чтобы они были парой */
+.btn-pause {
     margin-left: 10px;
 }
 
-.btn-sound:active {
+.btn-sound:hover,
+.btn-pause:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.btn-sound:active,
+.btn-pause:active {
     background: rgba(255, 255, 255, 0.25);
     transform: scale(0.92);
 }
@@ -722,33 +918,6 @@ body {
 .btn-sound.muted {
     opacity: 0.5;
     border-color: rgba(255, 100, 100, 0.3);
-}
-
-/* Кнопка паузы в игре */
-.btn-pause {
-    width: 48px;
-    height: 48px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    color: #FFFFFF;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    backdrop-filter: blur(10px);
-    margin-left: 10px;
-}
-
-.btn-pause:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.4);
-}
-
-.btn-pause:active {
-    background: rgba(255, 255, 255, 0.25);
-    transform: scale(0.92);
 }
 
 .game-area {
@@ -1533,3 +1702,4 @@ body {
     0%, 100% { transform: translateY(0) rotate(0deg); }
     50% { transform: translateY(-10px) rotate(2deg); }
 }
+

@@ -34,9 +34,12 @@ class SpaceRacing {
         
         // Данные о кораблях
         this.ships = {
-            1: { name: 'Spaceship #1', price: 0, unlocked: true, stars: 2 },
-            2: { name: 'Spaceship #2', price: 500, unlocked: false, stars: 3 },
-            3: { name: 'Spaceship #3', price: 1000, unlocked: false, stars: 4 }
+            1: { name: 'Sky Striker', price: 0, unlocked: true, stars: 2 },
+            2: { name: 'Forest Wraith', price: 500, unlocked: false, stars: 3 },
+            3: { name: 'Pink Lightning', price: 1000, unlocked: false, stars: 4 },
+            4: { name: 'Midas Touch', price: 2000, unlocked: false, stars: 4 },
+            5: { name: 'Dark Matter', price: 3500, unlocked: false, stars: 5 },
+            6: { name: 'Blood Moon', price: 5000, unlocked: false, stars: 5 }
         };
 
         // Язык и переводы (НОВОЕ)
@@ -470,7 +473,7 @@ class SpaceRacing {
         
         const startBtn = document.createElement('button');
         startBtn.className = 'start-game-btn';
-        startBtn.textContent = 'START RACE 🚀';
+        startBtn.textContent = 'START RACE';
         startBtn.onclick = () => this.startGame();
         container.appendChild(startBtn);
     }
@@ -577,10 +580,13 @@ class SpaceRacing {
         const shipImages = {
             1: './images/ship-1.png',
             2: './images/ship-2.png',
-            3: './images/ship-3.png'
+            3: './images/ship-3.png',
+            4: './images/ship-4.png',  // Зелёный
+            5: './images/ship-5.png',  // Фиолетовый
+            6: './images/ship-6.png'   // Красный
         };
         
-        playerShip.classList.remove('ship-1', 'ship-2', 'ship-3');
+        playerShip.classList.remove('ship-1', 'ship-2', 'ship-3', 'ship-4', 'ship-5', 'ship-6');
         playerShip.classList.add(`ship-${this.selectedShip}`);
         playerShip.style.backgroundImage = `url('${shipImages[this.selectedShip]}')`;
     }
