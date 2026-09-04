@@ -29,7 +29,7 @@ class SpaceRacing {
         this.gameWidth = 0;
         this.gameHeight = 0;
         
-        // Таймер респавна (ДОБАВЛЕНО)
+        // Таймер респавна
         this.respawnTimerId = null;
         
         // Данные о кораблях
@@ -38,6 +38,45 @@ class SpaceRacing {
             2: { name: 'Spaceship #2', price: 500, unlocked: false, stars: 3 },
             3: { name: 'Spaceship #3', price: 1000, unlocked: false, stars: 4 }
         };
+
+        // Язык и переводы (НОВОЕ)
+        this.currentLanguage = null;
+        this.translations = {
+            en: {
+                start: 'START',
+                selectShip: 'Select Spaceship',
+                score: 'SCORE',
+                gameOver: 'GAME OVER',
+                pause: 'PAUSE',
+                resume: 'RESUME',
+                home: 'HOME',
+                store: 'STORE',
+                next: 'NEXT',
+                settings: 'SETTINGS',
+                levelComplete: 'LEVEL COMPLETE!',
+                youGotReward: 'YOU GOT A REWARD',
+                nextLife: 'Next Life in'
+            },
+            ru: {
+                start: 'СТАРТ',
+                selectShip: 'Выбери корабль',
+                score: 'СЧЁТ',
+                gameOver: 'ИГРА ОКОНЧЕНА',
+                pause: 'ПАУЗА',
+                resume: 'ПРОДОЛЖИТЬ',
+                home: 'ГЛАВНАЯ',
+                store: 'МАГАЗИН',
+                next: 'ДАЛЕЕ',
+                settings: 'НАСТРОЙКИ',
+                levelComplete: 'УРОВЕНЬ ПРОЙДЕН!',
+                youGotReward: 'ТЫ ПОЛУЧИЛ НАГРАДУ',
+                nextLife: 'Следующая жизнь через'
+            }
+        };
+
+        // Аудио система
+        this.audioContext = null;
+        this.audioEnabled = true;
         
         this.init();
     }
@@ -58,8 +97,239 @@ class SpaceRacing {
         this.setupKeyboard();
         this.loadData();
         this.renderShips();
+
+        this.initAudio();
+        this.setupGlobalClickSound();
         
         console.log('🚀 SpaceRacing by TINELAB initialized');
+    }
+
+    // Выбор языка
+    selectLanguage(lang) {
+        this.currentLanguage = lang;
+        this.saveData();
+        this.applyTranslations();
+        this.showScreen('startScreen');
+        
+        if (this.tg && this.tg.HapticFeedback) {
+            this.tg.HapticFeedback.selectionChanged();
+        }
+        
+        console.log('🌐 Language selected:', lang);
+    }
+
+    // Применение переводов
+    applyTranslations() {
+        if (!this.currentLanguage) return;
+        
+        const t = this.translations[this.currentLanguage];
+        
+        // Обновляем тексты на страницах
+        const startBtn = document.querySelector('.btn-start span');
+        if (startBtn) startBtn.textContent = t.start;
+        
+        const selectShipTitle = document.querySelector('.ship-selection h2');
+        if (selectShipTitle) selectShipTitle.textContent = t.selectShip;
+        
+        const scoreLabel = document.querySelector('.score-label');
+        if (scoreLabel) scoreLabel.textContent = t.score;
+        
+        const gameOverTitle = document.querySelector('.game-over h2');
+        if (gameOverTitle) gameOverTitle.textContent = t.gameOver;
+        
+        const pauseTitle = document.querySelector('.pause-content h2');
+        if (pauseTitle) pauseTitle.textContent = t.pause;
+        
+        const resumeBtn = document.querySelector('.btn-resume');
+        if (resumeBtn) resumeBtn.textContent = t.resume;
+        
+        const homeBtns = document.querySelectorAll('.btn-home, .btn-home-pause');
+        homeBtns.forEach(btn => { if (btn) btn.textContent = t.home; });
+        
+        const storeBtn = document.querySelector('.btn-store');
+        if (storeBtn) storeBtn.textContent = t.store;
+        
+        const nextBtn = document.querySelector('.btn-next');
+        if (nextBtn) nextBtn.textContent = t.next;
+        
+        const settingsBtn = document.querySelector('.btn-settings');
+        if (settingsBtn) settingsBtn.textContent = t.settings;
+        
+        const levelCompleteTitle = document.querySelector('.level-complete h2');
+        if (levelCompleteTitle) levelCompleteTitle.textContent = t.levelComplete;
+        
+        const rewardText = document.querySelector('.reward-box span');
+        if (rewardText) rewardText.textContent = t.youGotReward;
+        
+        const nextLifeText = document.querySelector('.next-life span:first-child');
+        if (nextLifeText) nextLifeText.textContent = t.nextLife + ' ';
+        
+        console.log('✅ Translations applied:', this.currentLanguage);
+    }
+
+    // Проверка языка при загрузке
+    checkLanguage() {
+        if (!this.currentLanguage) {
+            this.showScreen('languageScreen');
+        } else {
+            this.applyTranslations();
+            this.showScreen('startScreen');
+        }
+    }
+
+    // Инициализация аудио контекста
+    initAudio() {
+        try {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) {
+                this.audioContext = new AudioContextClass();
+                console.log('🔊 Audio system initialized');
+            }
+        } catch(e) {
+            console.log('Audio not supported');
+            this.audioEnabled = false;
+        }
+    }
+
+    // Разблокировка аудио (браузеры требуют первого клика)
+    unlockAudio() {
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+    }
+
+    // Звук клика — короткий щелчок
+    playClickSound() {
+        if (!this.audioEnabled || !this.audioContext) return;
+        this.unlockAudio();
+        
+        const ctx = this.audioContext;
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        // Настройки звука клика
+        oscillator.frequency.value = 600;
+        oscillator.type = 'sine';
+        
+        // Очень короткий звук (0.08 сек)
+        gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+        
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.08);
+    }
+
+    // Звук монеты — приятный "дзынь" (на будущее)
+    playCoinSound() {
+        if (!this.audioEnabled || !this.audioContext) return;
+        this.unlockAudio();
+        
+        const ctx = this.audioContext;
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        oscillator.frequency.setValueAtTime(880, ctx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1);
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.3);
+    }
+
+    // Звук столкновения — низкий "бум" (на будущее)
+    playCrashSound() {
+        if (!this.audioEnabled || !this.audioContext) return;
+        this.unlockAudio();
+        
+        const ctx = this.audioContext;
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        oscillator.frequency.setValueAtTime(200, ctx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.3);
+        oscillator.type = 'sawtooth';
+        
+        gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.3);
+    }
+
+    // Переключение звука
+    toggleSound() {
+        this.audioEnabled = !this.audioEnabled;
+        this.updateSoundButton();
+        this.saveData();
+        
+        if (this.tg && this.tg.HapticFeedback) {
+            this.tg.HapticFeedback.selectionChanged();
+        }
+        
+        if (this.audioEnabled) {
+            this.unlockAudio();
+            this.playClickSound();
+        }
+    }
+
+    // Обновление иконки кнопки звука
+    updateSoundButton() {
+        const btn = document.getElementById('btnSound');
+        if (!btn) return;
+        
+        if (this.audioEnabled) {
+            btn.classList.remove('muted');
+            btn.innerHTML = `
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 5L6 9H2V15H6L11 19V5Z" fill="currentColor"/>
+                    <path d="M15.54 8.46C16.4774 9.39764 17.004 10.6692 17.004 11.995C17.004 13.3208 16.4774 14.5924 15.54 15.53" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M19.07 4.93C20.9447 6.80527 21.9979 9.34836 21.9979 12C21.9979 14.6516 20.9447 17.1947 19.07 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            `;
+        } else {
+            btn.classList.add('muted');
+            btn.innerHTML = `
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 5L6 9H2V15H6L11 19V5Z" fill="currentColor"/>
+                    <line x1="23" y1="9" x2="17" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="17" y1="9" x2="23" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            `;
+        }
+    }
+
+    // Глобальный обработчик кликов на все кнопки
+    setupGlobalClickSound() {
+        // Ждем загрузки DOM
+        setTimeout(() => {
+            // Все кнопки в игре
+            const clickables = document.querySelectorAll('button, .ship-card, .btn-start');
+            
+            clickables.forEach(el => {
+                el.addEventListener('click', () => {
+                    this.playClickSound();
+                });
+                
+                // Для тач-устройств
+                el.addEventListener('touchstart', () => {
+                    this.playClickSound();
+                }, { passive: true });
+            });
+            
+            console.log('👆 Click sounds attached to', clickables.length, 'elements');
+        }, 500);
     }
     
     setupTouchControls() {
@@ -206,6 +476,8 @@ class SpaceRacing {
     }
     
     handleShipClick(shipId) {
+        this.playClickSound(); // ← ДОБАВИТЬ
+
         const ship = this.ships[shipId];
         
         if (ship.unlocked) {
@@ -490,6 +762,8 @@ class SpaceRacing {
     collectCoin(coin) {
         coin.collected = true;
         coin.element.classList.add('collected');
+
+        this.playCoinSound(); // ← ЗВУК МОНЕТЫ
         
         this.coins++;
         this.score += 50;
@@ -512,6 +786,8 @@ class SpaceRacing {
     
     gameOver() {
         this.isPlaying = false;
+
+        this.playCrashSound(); // ← ЗВУК СТОЛКНОВЕНИЯ
         
         const finalScore = document.getElementById('finalScore');
         const collectedCoins = document.getElementById('collectedCoins');
@@ -615,7 +891,9 @@ class SpaceRacing {
             selectedShip: this.selectedShip,
             level: this.level,
             highScore: this.score,
-            ships: this.ships
+            ships: this.ships,
+            audioEnabled: this.audioEnabled,
+            currentLanguage: this.currentLanguage  // ← ДОБАВИТЬ
         };
         localStorage.setItem('spaceRacingData', JSON.stringify(data));
     }
@@ -628,6 +906,10 @@ class SpaceRacing {
                 this.coins = parsed.coins || 1500;
                 this.selectedShip = parsed.selectedShip || 1;
                 this.level = parsed.level || 1;
+                this.audioEnabled = parsed.audioEnabled !== undefined ? parsed.audioEnabled : true;
+                
+                // Загружаем язык
+                this.currentLanguage = parsed.currentLanguage || null;
                 
                 if (parsed.ships) {
                     Object.keys(parsed.ships).forEach(id => {
@@ -639,7 +921,16 @@ class SpaceRacing {
                 
                 this.updateCoinDisplay();
                 this.updateShipAppearance();
-            } catch(e) {}
+                this.updateSoundButton();
+                
+                // Проверяем язык после загрузки
+                this.checkLanguage();
+            } catch(e) {
+                console.log('Error loading data');
+            }
+        } else {
+            this.updateSoundButton();
+            this.checkLanguage();
         }
     }
 }

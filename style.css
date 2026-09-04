@@ -43,6 +43,86 @@ body {
     background: var(--bg-primary);
 }
 
+/* Language Selection Screen */
+.language-screen {
+    background: radial-gradient(ellipse at center, #1A1A1A 0%, #0A0A0A 50%, #000000 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.language-container {
+    text-align: center;
+    z-index: 10;
+    padding: 20px;
+}
+
+.language-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2em;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+.language-subtitle {
+    font-size: 1em;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 50px;
+    letter-spacing: 1px;
+}
+
+.language-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.btn-language {
+    padding: 20px 40px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.btn-language:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: translateY(-3px);
+}
+
+.btn-language:active {
+    transform: scale(0.95);
+}
+
+.lang-code {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2em;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 3px;
+}
+
+.lang-name {
+    font-size: 1em;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 1px;
+}
+
 /* Screen Management */
 .screen {
     position: absolute;
@@ -617,6 +697,33 @@ body {
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
+/* Кнопка звука */
+.btn-sound {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+    margin-left: 10px;
+}
+
+.btn-sound:active {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(0.92);
+}
+
+.btn-sound.muted {
+    opacity: 0.5;
+    border-color: rgba(255, 100, 100, 0.3);
+}
+
 /* Кнопка паузы в игре */
 .btn-pause {
     width: 48px;
@@ -818,6 +925,37 @@ body {
     width: 0%;
     transition: width 0.3s;
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* Футер под игровым полем */
+.game-footer {
+    text-align: center;
+    padding: 12px 20px 20px;
+    flex-shrink: 0;
+}
+
+.footer-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1em;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 4px;
+    margin: 0 0 6px 0;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+}
+
+.footer-credit {
+    font-size: 0.85em;
+    color: rgba(255, 255, 255, 0.4);
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+.footer-logo {
+    color: #FFFFFF;
+    font-weight: 700;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    letter-spacing: 2px;
 }
 
 /* Game Over Screen - КОМПАКТНЫЙ */

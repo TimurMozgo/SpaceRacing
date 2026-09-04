@@ -10,8 +10,33 @@
 </head>
 <body>
     <div id="app">
+
+        <!-- Language Selection Screen -->
+        <div class="screen language-screen active" id="languageScreen">
+            <div class="space-background">
+                <div class="stars"></div>
+            </div>
+            
+            <div class="language-container">
+                <h2 class="language-title">SELECT LANGUAGE</h2>
+                <p class="language-subtitle">Выберите язык</p>
+                
+                <div class="language-buttons">
+                    <button class="btn-language" onclick="game.selectLanguage('en')">
+                        <span class="lang-code">EN</span>
+                        <span class="lang-name">English</span>
+                    </button>
+                    
+                    <button class="btn-language" onclick="game.selectLanguage('ru')">
+                        <span class="lang-code">RU</span>
+                        <span class="lang-name">Русский</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Start Screen -->
-        <div class="screen start-screen active" id="startScreen">
+        <div class="screen start-screen" id="startScreen">
             <div class="space-background">
                 <div class="stars"></div>
                 <div class="planets">
@@ -74,6 +99,8 @@
                     <span id="gameCoins">1500</span>
                 </div>
 
+                <button class="btn-sound" id="btnSound" onclick="game.toggleSound()"></button>
+
                 <button class="btn-pause" onclick="game.togglePause()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/>
@@ -93,6 +120,11 @@
             
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="game-footer">
+                <h3 class="footer-title">SPACE RACING</h3>
+                <p class="footer-credit">Created by <span class="footer-logo">TINELAB</span></p>
             </div>
         </div>
 
