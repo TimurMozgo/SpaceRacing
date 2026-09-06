@@ -11,22 +11,19 @@
 <body>
     <div id="app">
 
-        <!-- Language Selection Screen -->
-        <div class="screen language-screen active" id="languageScreen">
+        <!-- 1. Экран выбора языка -->
+        <div class="screen language-screen" id="languageScreen">
             <div class="space-background">
                 <div class="stars"></div>
             </div>
-            
             <div class="language-container">
                 <h2 class="language-title">SELECT LANGUAGE</h2>
                 <p class="language-subtitle">Выберите язык</p>
-                
                 <div class="language-buttons">
                     <button class="btn-language" onclick="game.selectLanguage('en')">
                         <span class="lang-code">EN</span>
                         <span class="lang-name">English</span>
                     </button>
-                    
                     <button class="btn-language" onclick="game.selectLanguage('ru')">
                         <span class="lang-code">RU</span>
                         <span class="lang-name">Русский</span>
@@ -35,7 +32,7 @@
             </div>
         </div>
 
-        <!-- Start Screen -->
+        <!-- 2. Стартовый экран (БЕЗ навигации) -->
         <div class="screen start-screen" id="startScreen">
             <div class="space-background">
                 <div class="stars"></div>
@@ -60,8 +57,9 @@
                 </div>
             </div>
             
-            <button class="btn-start pulse-animation" onclick="game.showShipSelection()">
-                <span>START</span>
+            <!-- ИЗМЕНЕНО: Теперь ведёт в главное меню с табами -->
+            <button class="btn-start pulse-animation" onclick="game.goToMainMenu()">
+                <span id="btnStartText">START</span>
                 <div class="btn-glow"></div>
             </button>
             
@@ -71,23 +69,145 @@
             </div>
         </div>
 
-        <!-- Ship Selection Screen -->
-        <div class="screen ship-selection" id="shipSelection">
-            <div class="screen-header">
-                <button class="btn-back" onclick="game.showStartScreen()">←</button>
-                <h2>Select Spaceship</h2>
-                <div class="currency">
-                    <span class="coin-icon">🪙</span>
-                    <span id="coinCount">1500</span>
+        <!-- 3. ГЛАВНОЕ МЕНЮ С ТАБАМИ (Магазин, Топ, Профиль + Навигация) -->
+        <div class="screen main-menu" id="mainMenu">
+            
+            <!-- Вкладка: МАГАЗИН (Активна по умолчанию) -->
+            <div class="tab-content active" id="tab-shop">
+                <div class="shop-header">
+                    <h2 id="shopTitle">SELECT SPACESHIP</h2>
+                    <div class="currency">
+                        <span class="coin-icon">🪙</span>
+                        <span id="shopCoinCount">1500</span>
+                    </div>
+                </div>
+                <div class="ships-container" id="shipsContainer"></div>
+            </div>
+
+            <!-- Вкладка: ТОП -->
+            <div class="tab-content" id="tab-top">
+                <div class="top-header">
+                    <h2>🏆 LEADERBOARD</h2>
+                    <p class="top-subtitle">Best pilots of the galaxy</p>
+                </div>
+                <div class="leaderboard-list" id="leaderboardList">
+                    <div class="loading-spinner">Loading...</div>
                 </div>
             </div>
-            
-            <div class="ships-container" id="shipsContainer">
-                <!-- Ships render via JS -->
+
+            <!-- Вкладка: ПРОФИЛЬ (Перемещена внутрь main-menu) -->
+            <div class="tab-content" id="tab-profile">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <h2 id="profileName">PILOT</h2>
+                    <p class="profile-subtitle">Space Racing Legend</p>
+                </div>
+                
+                <div class="profile-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 6v6l4 2"></path>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">High Score</span>
+                            <span class="stat-value" id="statHighScore">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00BFFF" stroke-width="2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                                <path d="M2 17l10 5 10-5"></path>
+                                <path d="M2 12l10 5 10-5"></path>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Level</span>
+                            <span class="stat-value" id="statLevel">1</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF00FF" stroke-width="2">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Ships Owned</span>
+                            <span class="stat-value" id="statShips">1/5</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M8 12h8"></path>
+                                <path d="M12 8v8"></path>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Total Coins</span>
+                            <span class="stat-value" id="statCoins">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-actions">
+                    <button class="btn-profile-action" onclick="game.resetProgress()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                            <path d="M3 3v5h5"></path>
+                        </svg>
+                        <span>RESET PROGRESS</span>
+                    </button>
+                </div>
             </div>
+
+            <!-- НИЖНЯЯ НАВИГАЦИЯ (Теперь находится ВНУТРИ main-menu) -->
+            <nav class="bottom-nav">
+                <button class="nav-btn active" data-tab="shop" onclick="game.switchTab('shop')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <span>SHOP</span>
+                </button>
+                <button class="nav-btn" data-tab="top" onclick="game.switchTab('top')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                        <path d="M4 22h16"></path>
+                        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+                    </svg>
+                    <span>TOP</span>
+                </button>
+                <button class="nav-btn" data-tab="profile" onclick="game.switchTab('profile')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span>PROFILE</span>
+                </button>
+            </nav>
         </div>
 
-        <!-- Game Screen -->
+        <!-- 4. Игровой экран -->
         <div class="screen game-screen" id="gameScreen">
             <div class="game-header">
                 <div class="score-container">
@@ -113,9 +233,21 @@
                 <div class="game-background">
                     <div class="stars-game"></div>
                 </div>
+
+                <!-- Цели уровня -->
+                <div class="level-objectives" id="levelObjectives">
+                    <span>🎯 DIST: <span id="objDist">0/1000</span></span>
+                    <span>🪙 COINS: <span id="objCoins">0/15</span></span>
+                </div>
+
+                <!-- Игровые объекты -->
                 <div class="player-ship" id="playerShip"></div>
                 <div class="obstacles-container" id="obstacles"></div>
                 <div class="coins-container" id="coins"></div>
+                <div class="powerups-container" id="powerUpsContainer"></div>
+
+                <!-- Индикаторы пауэрапов ВНИЗУ -->
+                <div class="powerup-indicators" id="powerupIndicators"></div>
             </div>
             
             <div class="progress-bar">
@@ -128,7 +260,7 @@
             </div>
         </div>
 
-        <!-- Game Over Screen -->
+        <!-- 5. Game Over Screen -->
         <div class="screen game-over" id="gameOver">
             <div class="game-over-content">
                 <div class="explosion"></div>
@@ -147,12 +279,12 @@
                 </div>
                 <div class="game-over-buttons">
                     <button class="btn-home" onclick="game.showStartScreen()">HOME</button>
-                    <button class="btn-store" onclick="game.showShop()">STORE</button>
+                    <button class="btn-store" onclick="game.showShop()">SHOP</button>
                 </div>
             </div>
         </div>
 
-        <!-- Pause Screen -->
+        <!-- 6. Pause Screen -->
         <div class="screen pause-screen" id="pauseScreen">
             <div class="pause-content">
                 <h2>PAUSE</h2>
@@ -164,7 +296,7 @@
             </div>
         </div>
 
-        <!-- Level Complete -->
+        <!-- 7. Level Complete -->
         <div class="screen level-complete" id="levelComplete">
             <div class="complete-content">
                 <div class="stars-reward">
@@ -184,7 +316,8 @@
                 <button class="btn-next" onclick="game.nextLevel()">NEXT</button>
             </div>
         </div>
-    </div>
+
+    </div> <!-- Конец div id="app" -->
 
     <script src="script.js"></script>
 </body>

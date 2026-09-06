@@ -397,6 +397,170 @@ body {
     letter-spacing: 1px;
 }
 
+/* ===== НОВЫЙ ИГРОВОЙ UI ===== */
+.level-objectives {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.85em;
+    color: #FFF;
+    z-index: 50;
+    backdrop-filter: blur(5px);
+}
+
+.level-objectives span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.combo-display {
+    position: absolute;
+    top: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 50;
+    pointer-events: none;
+}
+
+.combo-display.active {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.1);
+}
+
+.combo-text {
+    display: block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1em;
+    color: #FFD700;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+.combo-value {
+    display: block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5em;
+    font-weight: 900;
+    color: #FFF;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+}
+
+/* ===== ИНДИКАТОРЫ ПАУЭРАПОВ ВНИЗУ ===== */
+.powerup-indicators {
+    position: absolute;
+    bottom: 80px; /* Над футером */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    z-index: 50;
+    pointer-events: none;
+}
+
+.p-indicator {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.3s ease;
+}
+
+.p-indicator.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Круговой SVG таймер */
+.p-indicator svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 60px;
+    transform: rotate(-90deg);
+}
+
+.p-indicator .circle-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.1);
+    stroke-width: 4;
+}
+
+.p-indicator .circle-progress {
+    fill: none;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 163; /* 2 * PI * 26 */
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 0.1s linear;
+}
+
+/* Цвета для разных пауэрапов */
+.p-indicator.shield .circle-progress { stroke: #00BFFF; filter: drop-shadow(0 0 8px #00BFFF); }
+.p-indicator.magnet .circle-progress { stroke: #FF00FF; filter: drop-shadow(0 0 8px #FF00FF); }
+.p-indicator.double .circle-progress { stroke: #FFD700; filter: drop-shadow(0 0 8px #FFD700); }
+
+/* Иконка внутри круга */
+.p-indicator .p-icon {
+    font-size: 1.5em;
+    z-index: 2;
+    text-shadow: 0 0 10px currentColor;
+}
+
+.p-indicator.shield .p-icon { color: #00BFFF; }
+.p-indicator.magnet .p-icon { color: #FF00FF; }
+.p-indicator.double .p-icon { color: #FFD700; font-size: 1.2em; font-weight: 900; }
+
+/* Сами пауэрапы в игре */
+.powerups-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.game-powerup {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    font-weight: 900;
+    pointer-events: auto;
+    animation: powerupPulse 1s ease-in-out infinite;
+}
+
+.game-powerup.shield { background: rgba(0, 191, 255, 0.3); border: 2px solid #00BFFF; box-shadow: 0 0 20px #00BFFF; }
+.game-powerup.magnet { background: rgba(255, 0, 255, 0.3); border: 2px solid #FF00FF; box-shadow: 0 0 20px #FF00FF; }
+.game-powerup.double { background: rgba(255, 215, 0, 0.3); border: 2px solid #FFD700; box-shadow: 0 0 20px #FFD700; }
+
+@keyframes powerupPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
 /* Фиксированный размер для блока с монетами */
 .currency {
     display: flex;
@@ -589,23 +753,6 @@ body {
 }
 .ship-card-5 .ship-preview {
     filter: drop-shadow(0 0 20px rgba(180, 0, 255, 0.8));
-}
-
-/* #6 Blood Moon - КРАСНЫЙ */
-.ship-card-6 {
-    background: linear-gradient(135deg, rgba(255, 30, 0, 0.12) 0%, rgba(130, 15, 0, 0.25) 100%);
-    border-color: rgba(255, 30, 0, 0.4);
-    box-shadow: 0 0 20px rgba(255, 30, 0, 0.15);
-}
-.ship-card-6.active {
-    border-color: #FF1E00;
-    box-shadow: 0 0 30px rgba(255, 30, 0, 0.5), inset 0 0 20px rgba(255, 30, 0, 0.1);
-}
-.ship-card-6:not(.locked):hover {
-    box-shadow: 0 5px 30px rgba(255, 30, 0, 0.4);
-}
-.ship-card-6 .ship-preview {
-    filter: drop-shadow(0 0 20px rgba(255, 30, 0, 0.8));
 }
 
 /* ===== АНИМАЦИЯ ВЫБРАННОГО КОРАБЛЯ ===== */
@@ -1703,3 +1850,225 @@ body {
     50% { transform: translateY(-10px) rotate(2deg); }
 }
 
+/* ===== НИЖНЯЯ НАВИГАЦИЯ (ЗАКРЕПЛЕНА ВНИЗУ) ===== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(15px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 200;
+}
+
+.nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 12px 0;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7em;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.nav-btn svg {
+    transition: all 0.3s ease;
+}
+
+.nav-btn.active {
+    color: #FFFFFF;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.nav-btn.active svg {
+    stroke: #0096FF;
+    filter: drop-shadow(0 0 8px rgba(0, 150, 255, 0.8));
+}
+
+.nav-btn:active {
+    transform: scale(0.95);
+}
+
+/* ===== ТАБЫ ===== */
+.tab-content {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    overflow-y: auto;
+    width: 100%;
+    padding-bottom: 80px; /* Отступ чтобы контент не прятался под навигацией */
+}
+
+.tab-content.active {
+    display: flex;
+}
+
+/* ===== ЦЕНТРИРОВАНИЕ ЗАГОЛОВКОВ ===== */
+
+/* Заголовок LEADERBOARD */
+.top-header {
+    text-align: center;
+    padding: 30px 20px 20px;
+}
+
+.top-header h2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Заголовок SELECT SPACESHIP */
+.shop-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.shop-header h2 {
+    flex: 1;
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3em;
+    color: #FFFFFF;
+    letter-spacing: 2px;
+    margin: 0;
+}
+
+/* Центрируем валюту в шапке магазина */
+.shop-header .currency {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* ===== ПРОФИЛЬ ===== */
+.profile-header {
+    text-align: center;
+    padding: 40px 20px 20px;
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 15px;
+    background: linear-gradient(135deg, rgba(0, 150, 255, 0.2), rgba(255, 0, 170, 0.2));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 30px rgba(0, 150, 255, 0.3);
+}
+
+.profile-avatar svg {
+    color: #FFFFFF;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+}
+
+.profile-header h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.8em;
+    color: #FFFFFF;
+    margin: 0 0 5px;
+    letter-spacing: 2px;
+}
+
+.profile-subtitle {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9em;
+    margin: 0;
+}
+
+.profile-stats {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.stat-icon {
+    flex-shrink: 0;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.stat-label {
+    font-size: 0.75em;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 1px;
+}
+
+.stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3em;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.profile-actions {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-profile-action {
+    background: rgba(255, 50, 50, 0.1);
+    border: 1px solid rgba(255, 50, 50, 0.3);
+    border-radius: 12px;
+    padding: 15px;
+    color: #FF3232;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9em;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.btn-profile-action:active {
+    background: rgba(255, 50, 50, 0.2);
+    transform: scale(0.95);
+}

@@ -18,6 +18,35 @@ class SpaceRacing {
         this.lastCoinSpawn = 0;
         this.distance = 0;
         this.level = 1;
+        this.levelCompleted = false; 
+
+        // НОВОЕ: Система целей и комбо
+        this.levelCoins = 0;
+        
+        // НОВОЕ: Активные пауэрапы
+        this.activePowerUps = {
+            shield: false,
+            magnet: false,
+            doubleCoins: false
+        };
+        this.powerUpTimers = {
+            shield: 0,
+            magnet: 0,
+            doubleCoins: 0
+        };
+        
+        // НОВОЕ: Массив пауэрапов на поле и таймер их спавна
+        this.powerUps = []; 
+        this.lastPowerUpSpawn = 0;
+        
+        // НОВОЕ: Цели для уровней
+        this.levelObjectives = {
+            1: { distance: 1000, coins: 15, name: "Разминка" },
+            2: { distance: 2000, coins: 30, name: "Астероидный пояс" },
+            3: { distance: 3500, coins: 50, name: "Глубокий космос" },
+            4: { distance: 5000, coins: 80, name: "Опасная зона" },
+            5: { distance: 7500, coins: 120, name: "Легенда" }
+        };
         
         // Управление
         this.touchActive = false;
@@ -32,17 +61,16 @@ class SpaceRacing {
         // Таймер респавна
         this.respawnTimerId = null;
         
-        // Данные о кораблях
+        // Данные о кораблях (идеальная пятёрка)
         this.ships = {
             1: { name: 'Sky Striker', price: 0, unlocked: true, stars: 2 },
             2: { name: 'Forest Wraith', price: 500, unlocked: false, stars: 3 },
             3: { name: 'Pink Lightning', price: 1000, unlocked: false, stars: 4 },
             4: { name: 'Midas Touch', price: 2000, unlocked: false, stars: 4 },
-            5: { name: 'Dark Matter', price: 3500, unlocked: false, stars: 5 },
-            6: { name: 'Blood Moon', price: 5000, unlocked: false, stars: 5 }
+            5: { name: 'Dark Matter', price: 3500, unlocked: false, stars: 5 }
         };
 
-        // Язык и переводы (НОВОЕ)
+        // Язык и переводы
         this.currentLanguage = null;
         this.translations = {
             en: {
@@ -571,7 +599,11 @@ class SpaceRacing {
         this.stopGame();
     }
 
-
+    goToMainMenu() {
+        this.playClickSound();
+        this.showScreen('mainMenu');
+        this.switchTab('shop');
+    }
     
     updateShipAppearance() {
         const playerShip = document.getElementById('playerShip');
@@ -583,7 +615,6 @@ class SpaceRacing {
             3: './images/ship-3.png',
             4: './images/ship-4.png',  // Зелёный
             5: './images/ship-5.png',  // Фиолетовый
-            6: './images/ship-6.png'   // Красный
         };
         
         playerShip.classList.remove('ship-1', 'ship-2', 'ship-3', 'ship-4', 'ship-5', 'ship-6');
@@ -594,26 +625,35 @@ class SpaceRacing {
     resetGame() {
         this.score = 0;
         this.distance = 0;
+        this.level = 1;
+        this.levelCoins = 0;
+        // УБРАТЬ: this.combo = 0; this.comboMultiplier = 1; if (this.comboTimer) clearTimeout(this.comboTimer);
+        
+        // Сброс пауэрапов
+        this.activePowerUps = { shield: false, magnet: false, doubleCoins: false };
+        this.powerUpTimers = { shield: 0, magnet: 0, doubleCoins: 0 };
+        this.powerUpMaxTime = { magnet: 15, doubleCoins: 15 }; // Максимальное время для таймера
+        
         this.gameSpeed = this.baseGameSpeed + (this.level * 0.5);
         this.obstacles = [];
         this.gameCoins = [];
+        this.powerUps = [];
         this.lastObstacleSpawn = Date.now();
         this.lastCoinSpawn = Date.now();
+        this.lastPowerUpSpawn = Date.now();
         
         const obstaclesContainer = document.getElementById('obstacles');
         const coinsContainer = document.getElementById('coins');
+        const powerUpsContainer = document.getElementById('powerUpsContainer');
         
         if (obstaclesContainer) obstaclesContainer.innerHTML = '';
         if (coinsContainer) coinsContainer.innerHTML = '';
+        if (powerUpsContainer) powerUpsContainer.innerHTML = '';
         
-        const playerShip = document.getElementById('playerShip');
-        if (playerShip) {
-            playerShip.style.left = '50%';
-            playerShip.classList.remove('ship-1', 'ship-2', 'ship-3');
-            playerShip.classList.add(`ship-${this.selectedShip}`);
-        }
-        
+        this.updateShipAppearance();
         this.updateScore();
+        this.updateLevelUI();
+        this.updatePowerUpUI(); // Сброс индикаторов
     }
     
     gameLoop(currentTime = 0) {
@@ -631,42 +671,46 @@ class SpaceRacing {
     }
     
     update() {
+        if (!this.isPlaying || this.isPaused) return;
+
         this.distance += this.gameSpeed * 0.1;
-        this.score = Math.floor(this.distance);
+        this.score = Math.floor(this.distance); // ← УБРАЛИ comboMultiplier отсюда
         this.updateScore();
         
-        // Плавное увеличение скорости
         this.gameSpeed = this.baseGameSpeed + (this.level * 0.5) + (this.distance * 0.002);
         
-        const progress = (this.distance % 1000) / 1000 * 100;
-        const progressFill = document.getElementById('progressFill');
-        if (progressFill) {
-            progressFill.style.width = progress + '%';
-        }
+        // Обновление UI целей
+        this.updateLevelUI();
         
-        // ЖЕСТКИЙ СПАВН ЧЕРЕЗ DATE.NOW()
+        // Обновление таймеров пауэрапов
+        this.updatePowerUpTimers();
+        
         const now = Date.now();
-        
-        // Препятствия каждые 1000мс (1 секунда)
         if (now - this.lastObstacleSpawn > 1000) {
             this.spawnObstacle();
             this.lastObstacleSpawn = now;
         }
-        
-        // Монеты каждые 700мс
         if (now - this.lastCoinSpawn > 700) {
             this.spawnCoin();
             this.lastCoinSpawn = now;
         }
+        // Спавн пауэрапов каждые 8-12 секунд
+        if (now - this.lastPowerUpSpawn > 8000 + Math.random() * 4000) {
+            this.spawnPowerUp();
+            this.lastPowerUpSpawn = now;
+        }
         
         this.updateObstacles();
         this.updateCoins();
+        this.updatePowerUps();
         
-        if (this.distance > this.level * 1000) {
+        // Проверка выполнения целей уровня
+        const obj = this.levelObjectives[this.level] || this.levelObjectives[5];
+        if (this.distance >= obj.distance && this.levelCoins >= obj.coins) {
             this.levelComplete();
         }
     }
-    
+
     spawnObstacle() {
         const obstacle = document.createElement('div');
         const asteroidType = Math.floor(Math.random() * 3) + 1;
@@ -727,12 +771,34 @@ class SpaceRacing {
             
             const obsYPercent = (obs.y / this.gameHeight) * 100;
             
+            // Более точная коллизия (уменьшил хитбокс)
             if (
-                Math.abs(playerX - obs.x) < 12 &&
-                Math.abs(playerY - obsYPercent) < 8
+                Math.abs(playerX - obs.x) < 8 &&
+                Math.abs(playerY - obsYPercent) < 6
             ) {
-                this.gameOver();
-                return false;
+                // ПРОВЕРКА ЩИТА
+                if (this.activePowerUps && this.activePowerUps.shield) {
+                    // Щит поглощает удар!
+                    this.activePowerUps.shield = false;
+                    this.updatePowerUpUI();
+                    
+                    // Вибрация при поглощении
+                    if (this.tg && this.tg.HapticFeedback) {
+                        this.tg.HapticFeedback.impactOccurred('medium');
+                    }
+                    
+                    // Удаляем астероид (щит его "разбил")
+                    if (obs.element && obs.element.parentNode) {
+                        obs.element.parentNode.removeChild(obs.element);
+                    }
+                    
+                    console.log('️ Shield absorbed hit!');
+                    return false;
+                } else {
+                    // Нет щита — конец игры
+                    this.gameOver();
+                    return false;
+                }
             }
             
             return obs.y < this.gameHeight + 100;
@@ -747,6 +813,20 @@ class SpaceRacing {
         
         this.gameCoins = this.gameCoins.filter(coin => {
             if (coin.collected) return false;
+            
+            // МАГНИТ: если активен, притягиваем монеты в радиусе 30%
+            if (this.activePowerUps.magnet) {
+                const dx = playerX - coin.x;
+                const dy = playerY - (coin.y / this.gameHeight * 100);
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 30) { // Радиус магнита
+                    // Притягиваем монету к игроку
+                    coin.x += dx * 0.15;
+                    coin.y += dy * 0.15 * (this.gameHeight / 100);
+                    coin.element.style.left = coin.x + '%';
+                }
+            }
             
             coin.y += this.gameSpeed;
             coin.element.style.top = coin.y + 'px';
@@ -764,15 +844,17 @@ class SpaceRacing {
             return coin.y < this.gameHeight + 100;
         });
     }
-    
+
     collectCoin(coin) {
         coin.collected = true;
         coin.element.classList.add('collected');
-
-        this.playCoinSound(); // ← ЗВУК МОНЕТЫ
+        this.playCoinSound();
         
-        this.coins++;
-        this.score += 50;
+        // Начисление монет (с учетом x2)
+        const coinValue = this.activePowerUps.doubleCoins ? 2 : 1;
+        this.coins += coinValue;
+        this.levelCoins += coinValue;
+        
         this.updateCoinDisplay();
         this.updateScore();
         
@@ -781,6 +863,180 @@ class SpaceRacing {
                 coin.element.parentNode.removeChild(coin.element);
             }
         }, 500);
+    }
+
+        // ===== НОВЫЕ МЕТОДЫ =====
+
+    updateLevelUI() {
+        const obj = this.levelObjectives[this.level] || this.levelObjectives[5];
+        const distEl = document.getElementById('objDist');
+        const coinEl = document.getElementById('objCoins');
+        if (distEl) distEl.textContent = `${Math.floor(this.distance)}/${obj.distance}`;
+        if (coinEl) coinEl.textContent = `${this.levelCoins}/${obj.coins}`;
+    }
+
+    spawnPowerUp() {
+        const types = ['shield', 'magnet', 'doubleCoins'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        const el = document.createElement('div');
+        el.className = `game-powerup ${type}`;
+        
+        const icons = { shield: '🛡️', magnet: '🧲', doubleCoins: 'x2' };
+        el.textContent = icons[type];
+        
+        const leftPos = Math.random() * 80 + 10;
+        el.style.left = leftPos + '%';
+        el.style.top = '-50px';
+        
+        const container = document.getElementById('powerUpsContainer');
+        if (container) container.appendChild(el);
+        
+        this.powerUps.push({
+            element: el,
+            type: type,
+            x: leftPos,
+            y: -50,
+            width: 40,
+            height: 40,
+            collected: false
+        });
+    }
+
+    updatePowerUps() {
+        if (this.gameHeight < 200) return;
+        const playerX = this.currentShipX;
+        const playerY = 85;
+        
+        this.powerUps = this.powerUps.filter(p => {
+            if (p.collected) return false;
+            
+            p.y += this.gameSpeed;
+            p.element.style.top = p.y + 'px';
+            const pYPercent = (p.y / this.gameHeight) * 100;
+            
+            // Сбор пауэрапа
+            if (Math.abs(playerX - p.x) < 15 && Math.abs(playerY - pYPercent) < 10) {
+                this.activatePowerUp(p.type);
+                if (p.element.parentNode) p.element.parentNode.removeChild(p.element);
+                return false;
+            }
+            
+            return p.y < this.gameHeight + 100;
+        });
+    }
+
+    activatePowerUp(type) {
+        this.activePowerUps[type] = true;
+        
+        // Длительность и визуальный эффект
+        if (type === 'magnet') {
+            this.powerUpTimers.magnet = 15;
+            this.showFloatingText('MAGNET!', '#FF00FF');
+        }
+        if (type === 'doubleCoins') {
+            this.powerUpTimers.doubleCoins = 15;
+            this.showFloatingText('x2 COINS!', '#FFD700');
+        }
+        if (type === 'shield') {
+            this.showFloatingText('SHIELD!', '#00BFFF');
+        }
+        
+        this.updatePowerUpUI();
+        this.playCoinSound();
+    }
+
+    // Обновление таймеров каждый кадр (для плавного стирания круга)
+    updatePowerUpTimers() {
+        const delta = 0.016; // ~60 кадров в секунду
+        
+        if (this.activePowerUps.magnet) {
+            this.powerUpTimers.magnet -= delta;
+            if (this.powerUpTimers.magnet <= 0) this.activePowerUps.magnet = false;
+        }
+        if (this.activePowerUps.doubleCoins) {
+            this.powerUpTimers.doubleCoins -= delta;
+            if (this.powerUpTimers.doubleCoins <= 0) this.activePowerUps.doubleCoins = false;
+        }
+        
+        // Перерисовываем круги каждый кадр
+        this.updatePowerUpUI();
+    }
+
+    // Рисуем красивые круговые индикаторы снизу
+    updatePowerUpUI() {
+        const container = document.getElementById('powerupIndicators');
+        if (!container) return;
+        
+        container.innerHTML = ''; // Очищаем перед перерисовкой
+        
+        // Данные для отрисовки (только активные)
+        const powerUps = [
+            { type: 'shield', icon: '🛡️', active: this.activePowerUps.shield, time: 1, maxTime: 1 },
+            { type: 'magnet', icon: '🧲', active: this.activePowerUps.magnet, time: this.powerUpTimers.magnet, maxTime: 15 },
+            { type: 'double', icon: 'x2', active: this.activePowerUps.doubleCoins, time: this.powerUpTimers.doubleCoins, maxTime: 15 }
+        ];
+        
+        powerUps.forEach(p => {
+            if (!p.active) return; 
+            
+            const indicator = document.createElement('div');
+            indicator.className = `p-indicator ${p.type} active`;
+            
+            // Длина окружности для r=26 равна ~163. 
+            // stroke-dashoffset управляет тем, насколько круг "стёрт"
+            const circumference = 163;
+            const progress = (p.time / p.maxTime) * circumference;
+            const offset = circumference - progress;
+            
+            indicator.innerHTML = `
+                <svg viewBox="0 0 60 60">
+                    <circle class="circle-bg" cx="30" cy="30" r="26"></circle>
+                    <circle class="circle-progress" cx="30" cy="30" r="26" style="stroke-dashoffset: ${offset}"></circle>
+                </svg>
+                <span class="p-icon">${p.icon}</span>
+            `;
+            
+            container.appendChild(indicator);
+        });
+    }
+
+    showFloatingText(text, color) {
+        const el = document.createElement('div');
+        el.textContent = text;
+        el.style.cssText = `
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2em;
+            font-weight: 900;
+            color: ${color};
+            text-shadow: 0 0 20px ${color};
+            pointer-events: none;
+            z-index: 100;
+            animation: floatUp 1.5s ease-out forwards;
+        `;
+        
+        if (!document.querySelector('#floatAnim')) {
+            const style = document.createElement('style');
+            style.id = 'floatAnim';
+            style.textContent = `
+                @keyframes floatUp {
+                    0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+                    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+                    100% { opacity: 0; transform: translate(-50%, -80%) scale(1); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        const gameArea = document.getElementById('gameArea');
+        if (gameArea) gameArea.appendChild(el);
+        
+        setTimeout(() => {
+            if (el.parentNode) el.parentNode.removeChild(el);
+        }, 1500);
     }
 
     clearRespawnTimer() {
@@ -824,11 +1080,10 @@ class SpaceRacing {
     
     levelComplete() {
         this.isPlaying = false;
+        this.levelCompleted = false;  // ← Сбрасываем флаг
         this.level++;
-        
         this.coins += 300;
         this.updateCoinDisplay();
-        
         this.showScreen('levelComplete');
         this.saveData();
     }
@@ -864,8 +1119,9 @@ class SpaceRacing {
     
     showShop() {
         this.clearRespawnTimer(); // Очищаем таймер
-        this.showScreen('shipSelection');
-        this.renderShips();
+        this.stopGame();
+        this.showScreen('mainMenu'); // ← ИСПРАВЛЕНО: открываем mainMenu
+        this.switchTab('shop');      // ← ИСПРАВЛЕНО: переключаем на вкладку магазина
     }
     
     stopGame() {
@@ -885,6 +1141,7 @@ class SpaceRacing {
     
     updateCoinDisplay() {
         const coinCount = document.getElementById('coinCount');
+        const shopCoinCount = document.getElementById('shopCoinCount'); 
         const gameCoins = document.getElementById('gameCoins');
         
         if (coinCount) coinCount.textContent = this.coins;
@@ -937,6 +1194,58 @@ class SpaceRacing {
         } else {
             this.updateSoundButton();
             this.checkLanguage();
+        }
+    }
+
+    // ===== ПЕРЕКЛЮЧЕНИЕ ТАБОВ =====
+    switchTab(tabName) {
+        // Убираем active у всех табов и кнопок
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+        
+        // Показываем нужный таб
+        const targetTab = document.getElementById(`tab-${tabName}`);
+        if (targetTab) targetTab.classList.add('active');
+        
+        // Подсвечиваем кнопку
+        const targetBtn = document.querySelector(`.nav-btn[data-tab="${tabName}"]`);
+        if (targetBtn) targetBtn.classList.add('active');
+        
+        // Логика для каждой вкладки
+        if (tabName === 'top') {
+            this.fetchLeaderboard();
+        } else if (tabName === 'shop') {
+            this.renderShips();
+            this.updateCoinDisplay();
+        } else if (tabName === 'profile') {
+            this.updateProfileStats();
+        }
+        
+        // Вибрация
+        if (this.tg && this.tg.HapticFeedback) {
+            this.tg.HapticFeedback.selectionChanged();
+        }
+    }
+
+    // ===== ОБНОВЛЕНИЕ СТАТИСТИКИ ПРОФИЛЯ =====
+    updateProfileStats() {
+        const playerName = this.tg?.initDataUnsafe?.user?.first_name || 'PILOT';
+        document.getElementById('profileName').textContent = playerName.toUpperCase();
+        
+        document.getElementById('statHighScore').textContent = this.score.toLocaleString();
+        document.getElementById('statLevel').textContent = this.level;
+        
+        const ownedShips = Object.values(this.ships).filter(s => s.unlocked).length;
+        document.getElementById('statShips').textContent = `${ownedShips}/${Object.keys(this.ships).length}`;
+        
+        document.getElementById('statCoins').textContent = this.coins.toLocaleString();
+    }
+
+    // ===== СБРОС ПРОГРЕССА =====
+    resetProgress() {
+        if (confirm('Are you sure you want to reset all progress? This cannot be undone!')) {
+            localStorage.removeItem('spaceRacingData');
+            location.reload();
         }
     }
 }
