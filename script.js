@@ -1,3 +1,7 @@
+// ===== N8N CONFIGURATION =====
+const N8N_SUBMIT_URL = 'https://tiktiok.xyz/webhook-test/submit-score';
+const N8N_GET_URL = 'https://твой-n8n.com/webhook/get-leaderboard';
+
 // SpaceRacing Game - Created by TINELAB
 class SpaceRacing {
     constructor() {
@@ -1049,6 +1053,8 @@ class SpaceRacing {
     gameOver() {
         this.isPlaying = false;
 
+        this.submitScoreToLeaderboard(this.score);
+
         this.playCrashSound(); // ← ЗВУК СТОЛКНОВЕНИЯ
         
         const finalScore = document.getElementById('finalScore');
@@ -1247,6 +1253,88 @@ class SpaceRacing {
             localStorage.removeItem('spaceRacingData');
             location.reload();
         }
+    }
+
+        // ===== N8N LEADERBOARD METHODS =====
+    
+    // 1. Отправка счета при проигрыше
+    async submitScoreToLeaderboard(finalScore) {
+        const user = this.tg?.initDataUnsafe?.user;
+        const playerName = user?.first_name || 'Anonymous';
+        const userId = user?.id || null;
+
+        const payload = {
+            name: playerName,
+            userId: userId,
+            score: finalScore,
+            shipId: this.selectedShip
+        };
+
+        console.log('📤 Отправка счета в n8n:', payload);
+
+        try {
+            const response = await fetch(N8N_SUBMIT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json();
+            console.log('✅ Ответ от n8n:', result);
+        } catch (error) {
+            console.error('❌ Ошибка отправки счета:', error);
+        }
+    }
+
+    // 2. Получение таблицы лидеров
+    async fetchLeaderboard() {
+        const listContainer = document.getElementById('leaderboardList');
+        listContainer.innerHTML = '<div class="loading-spinner">LOADING...</div>';
+
+        try {
+            const response = await fetch(N8N_GET_URL);
+            const data = await response.json();
+
+            if (data.success && data.leaderboard && data.leaderboard.length > 0) {
+                this.renderLeaderboard(data.leaderboard);
+            } else {
+                listContainer.innerHTML = '<div class="loading-spinner">NO DATA YET</div>';
+            }
+        } catch (error) {
+            console.error('❌ Ошибка загрузки таблицы:', error);
+            listContainer.innerHTML = '<div class="loading-spinner">ERROR</div>';
+        }
+    }
+
+    // 3. Отрисовка таблицы лидеров
+    renderLeaderboard(data) {
+        const listContainer = document.getElementById('leaderboardList');
+        listContainer.innerHTML = '';
+
+        const shipColors = {
+            1: '#0096FF',
+            2: '#00DC64',
+            3: '#FF00AA',
+            4: '#FFD700',
+            5: '#B400FF'
+        };
+
+        data.forEach(player => {
+            const row = document.createElement('div');
+            row.className = `lb-row rank-${player.rank <= 3 ? player.rank : 'normal'}`;
+            
+            const shipColor = shipColors[player.shipId] || '#FFFFFF';
+
+            row.innerHTML = `
+                <div class="lb-rank">#${player.rank}</div>
+                <div class="lb-info">
+                    <div class="lb-ship-icon" style="background: ${shipColor}; box-shadow: 0 0 10px ${shipColor}"></div>
+                    <div class="lb-name">${player.name}</div>
+                </div>
+                <div class="lb-score">${player.score.toLocaleString()}</div>
+            `;
+
+            listContainer.appendChild(row);
+        });
     }
 }
 
