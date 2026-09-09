@@ -1,6 +1,7 @@
+
 // ===== N8N CONFIGURATION =====
-const N8N_SUBMIT_URL = 'https://tiktiok.xyz/webhook-test/submit-score';
-const N8N_GET_URL = 'https://твой-n8n.com/webhook/get-leaderboard';
+const N8N_SUBMIT_URL = 'https://tiktiok.xyz/webhook/submit-score';
+const N8N_GET_URL = 'https://tiktiok.xyz/webhook/get-leaderboard';
 
 // SpaceRacing Game - Created by TINELAB
 class SpaceRacing {
@@ -1255,13 +1256,14 @@ class SpaceRacing {
         }
     }
 
-        // ===== N8N LEADERBOARD METHODS =====
-    
+    // ===== N8N LEADERBOARD METHODS =====
+
     // 1. Отправка счета при проигрыше
+
     async submitScoreToLeaderboard(finalScore) {
         const user = this.tg?.initDataUnsafe?.user;
-        const playerName = user?.first_name || 'Anonymous';
-        const userId = user?.id || null;
+        const playerName = user?.first_name || 'TestPlayer';
+        const userId = user?.id || 999999;
 
         const payload = {
             name: playerName,
@@ -1270,18 +1272,16 @@ class SpaceRacing {
             shipId: this.selectedShip
         };
 
-        console.log('📤 Отправка счета в n8n:', payload);
+        console.log('📤 Отправка счета:', payload);
 
         try {
-            const response = await fetch(N8N_SUBMIT_URL, {
+            await fetch(N8N_SUBMIT_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            const result = await response.json();
-            console.log('✅ Ответ от n8n:', result);
         } catch (error) {
-            console.error('❌ Ошибка отправки счета:', error);
+            console.error('❌ Ошибка отправки:', error);
         }
     }
 
@@ -1291,7 +1291,12 @@ class SpaceRacing {
         listContainer.innerHTML = '<div class="loading-spinner">LOADING...</div>';
 
         try {
-            const response = await fetch(N8N_GET_URL);
+            // Используем POST для надежного обхода CORS в браузере
+            const response = await fetch(N8N_GET_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({}) 
+            });
             const data = await response.json();
 
             if (data.success && data.leaderboard && data.leaderboard.length > 0) {
@@ -1300,7 +1305,7 @@ class SpaceRacing {
                 listContainer.innerHTML = '<div class="loading-spinner">NO DATA YET</div>';
             }
         } catch (error) {
-            console.error('❌ Ошибка загрузки таблицы:', error);
+            console.error('❌ Ошибка загрузки:', error);
             listContainer.innerHTML = '<div class="loading-spinner">ERROR</div>';
         }
     }
