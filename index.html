@@ -334,38 +334,38 @@
     <div class="modal" id="adminModal">
         <div class="modal-content admin-modal">
             <div class="modal-header">
-                <h2>⚙️ ADMIN PANEL</h2>
+                <h2>⚙️ ПАНЕЛЬ АДМИНИСТРАТОРА</h2>
                 <button class="modal-close" onclick="game.closeAdminPanel()">×</button>
             </div>
             
             <div class="admin-section">
-                <h3>🏆 CONTEST STATUS</h3>
+                <h3>🏆 СТАТУС КОНКУРСА</h3>
                 <div class="admin-info" id="contestStatusInfo">
                     <!-- Заполняется через JS -->
                 </div>
             </div>
             
             <div class="admin-section">
-                <h3>⏱️ TIMER CONTROL</h3>
+                <h3>⏱️ УПРАВЛЕНИЕ ТАЙМЕРОМ</h3>
                 <div class="admin-controls">
-                    <button class="btn-admin-control" onclick="game.extendContest(1)">+1 Day</button>
-                    <button class="btn-admin-control" onclick="game.extendContest(3)">+3 Days</button>
-                    <button class="btn-admin-control" onclick="game.extendContest(7)">+7 Days</button>
-                    <button class="btn-admin-control danger" onclick="game.resetContestTimer()">Reset Timer</button>
+                    <button class="btn-admin-control" onclick="game.extendContest(1)">+1 День</button>
+                    <button class="btn-admin-control" onclick="game.extendContest(3)">+3 Дня</button>
+                    <button class="btn-admin-control" onclick="game.extendContest(7)">+7 Дней</button>
+                    <button class="btn-admin-control danger" onclick="game.resetContestTimer()">Сбросить таймер</button>
                 </div>
             </div>
             
             <div class="admin-section">
-                <h3>🎮 CONTEST ACTIONS</h3>
+                <h3>🎮 ДЕЙСТВИЯ С КОНКУРСОМ</h3>
                 <div class="admin-controls">
-                    <button class="btn-admin-control" onclick="game.pauseContest()">Pause Contest</button>
-                    <button class="btn-admin-control" onclick="game.resumeContest()">Resume Contest</button>
-                    <button class="btn-admin-control danger" onclick="game.endContest()">End Contest Now</button>
+                    <button class="btn-admin-control" onclick="game.pauseContest()">Приостановить</button>
+                    <button class="btn-admin-control" onclick="game.resumeContest()">Возобновить</button>
+                    <button class="btn-admin-control danger" onclick="game.endContest()">Завершить сейчас</button>
                 </div>
             </div>
             
             <div class="admin-section">
-                <h3>📊 STATISTICS</h3>
+                <h3>📊 СТАТИСТИКА</h3>
                 <div class="admin-stats" id="adminStats">
                     <!-- Заполняется через JS -->
                 </div>
