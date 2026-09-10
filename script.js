@@ -67,6 +67,11 @@ class SpaceRacing {
         this.audioEnabled = true;
         this.init();
     }
+
+        // Обновляем время окончания конкурса
+    updateContestEndTime() {
+        contestEndTime = new Date(contestEndDate).getTime();
+    }
     
     init() {
         if (this.tg) {
@@ -84,6 +89,7 @@ class SpaceRacing {
         this.initAudio();
         this.setupGlobalClickSound();
         this.showAdminPanelButton(); // Показываем кнопку админа
+        this.updateContestEndTime();
         console.log('🚀 SpaceRacing by TINELAB initialized');
     }
 
@@ -861,34 +867,37 @@ class SpaceRacing {
         return `${days}d ${hours}h ${minutes}m`;
     }
 
-    extendContest(days) {
+        extendContest(days) {
         const now = new Date();
         const currentEnd = new Date(contestEndTime);
         const baseDate = now > currentEnd ? now : currentEnd;
         baseDate.setDate(baseDate.getDate() + days);
         contestEndDate = baseDate.toISOString();
         localStorage.setItem('contestEndDate', contestEndDate);
-        this.showNotification(`⏱️ Contest extended +${days} days!`, 'success');
+        this.updateContestEndTime(); // <-- ОБНОВЛЯЕМ contestEndTime!
+        this.showNotification(`⏱️ Конкурс продлён на +${days} дн.!`, 'success');
         this.updateAdminPanelInfo();
     }
 
     resetContestTimer() {
-        if (!confirm('Reset contest timer to 7 days from now?')) return;
+        if (!confirm('Сбросить таймер на 7 дней с текущего момента?')) return;
         const now = new Date();
         now.setDate(now.getDate() + CONTEST_DURATION_DAYS);
         contestEndDate = now.toISOString();
         localStorage.setItem('contestEndDate', contestEndDate);
-        this.showNotification('🔄 Timer reset to 7 days', 'success');
+        this.updateContestEndTime(); // <-- ОБНОВЛЯЕМ contestEndTime!
+        this.showNotification('🔄 Таймер сброшен на 7 дней', 'success');
         this.updateAdminPanelInfo();
     }
 
     pauseContest() {
-        if (!confirm('Pause contest? Scores will not be accepted.')) return;
+        if (!confirm('Приостановить конкурс? Счета не будут приниматься.')) return;
         const past = new Date();
         past.setDate(past.getDate() - 1);
         contestEndDate = past.toISOString();
         localStorage.setItem('contestEndDate', contestEndDate);
-        this.showNotification('⏸️ Contest PAUSED', 'error');
+        this.updateContestEndTime(); // <-- ОБНОВЛЯЕМ contestEndTime!
+        this.showNotification('⏸️ Конкурс ПРИОСТАНОВЛЕН', 'error');
         this.updateAdminPanelInfo();
     }
 
@@ -897,17 +906,19 @@ class SpaceRacing {
         now.setDate(now.getDate() + CONTEST_DURATION_DAYS);
         contestEndDate = now.toISOString();
         localStorage.setItem('contestEndDate', contestEndDate);
-        this.showNotification('▶️ Contest RESUMED', 'success');
+        this.updateContestEndTime(); // <-- ОБНОВЛЯЕМ contestEndTime!
+        this.showNotification('▶️ Конкурс ВОЗОБНОВЛЁН', 'success');
         this.updateAdminPanelInfo();
     }
 
     endContest() {
-        if (!confirm('END CONTEST NOW? This cannot be undone!')) return;
+        if (!confirm('ЗАВЕРШИТЬ КОНКУРС СЕЙЧАС? Это нельзя отменить!')) return;
         const now = new Date();
         now.setHours(now.getHours() - 1);
         contestEndDate = now.toISOString();
         localStorage.setItem('contestEndDate', contestEndDate);
-        this.showNotification('🏁 CONTEST ENDED', 'error');
+        this.updateContestEndTime(); // <-- ОБНОВЛЯЕМ contestEndTime!
+        this.showNotification('🏁 КОНКУРС ЗАВЕРШЁН', 'error');
         this.updateAdminPanelInfo();
     }
 }
