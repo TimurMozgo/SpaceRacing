@@ -1,7 +1,6 @@
 
 // ===== N8N CONFIGURATION =====
-const N8N_SUBMIT_URL = 'https://tiktiok.xyz/webhook/submit-score';
-const N8N_GET_URL = 'https://tiktiok.xyz/webhook/get-leaderboard';
+const N8N_URL = 'https://tiktiok.xyz/webhook-test/get-leaderboard';
 
 // SpaceRacing Game - Created by TINELAB
 class SpaceRacing {
@@ -1258,8 +1257,7 @@ class SpaceRacing {
 
     // ===== N8N LEADERBOARD METHODS =====
 
-    // 1. Отправка счета при проигрыше
-
+        // 1. Отправка счета и получение обновленной таблицы
     async submitScoreToLeaderboard(finalScore) {
         const user = this.tg?.initDataUnsafe?.user;
         const playerName = user?.first_name || 'TestPlayer';
@@ -1275,28 +1273,36 @@ class SpaceRacing {
         console.log('📤 Отправка счета:', payload);
 
         try {
-            await fetch(N8N_SUBMIT_URL, {
+            const response = await fetch(N8N_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
+            
+            const data = await response.json();
+            console.log('✅ Ответ от n8n:', data);
+            
+            // Если пришел leaderboard — можно сразу обновить UI
+            if (data.success && data.leaderboard) {
+                console.log('🏆 Leaderboard получен:', data.leaderboard);
+            }
         } catch (error) {
-            console.error('❌ Ошибка отправки:', error);
+            console.error('❌ Ошибка:', error);
         }
     }
 
-    // 2. Получение таблицы лидеров
+        // 2. Получение таблицы лидеров (просто запрашиваем без данных игрока)
     async fetchLeaderboard() {
         const listContainer = document.getElementById('leaderboardList');
         listContainer.innerHTML = '<div class="loading-spinner">LOADING...</div>';
 
         try {
-            // Используем POST для надежного обхода CORS в браузере
-            const response = await fetch(N8N_GET_URL, {
+            const response = await fetch(N8N_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({}) 
+                body: JSON.stringify({ action: 'get' }) // Пустой запрос для получения данных
             });
+            
             const data = await response.json();
 
             if (data.success && data.leaderboard && data.leaderboard.length > 0) {
