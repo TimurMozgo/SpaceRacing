@@ -1,6 +1,6 @@
 
 // ===== N8N CONFIGURATION =====
-const N8N_URL = 'https://tiktiok.xyz/webhook-test/get-leaderboard';
+const N8N_URL = 'https://tiktiok.xyz/webhook/get-leaderboard';
 
 // SpaceRacing Game - Created by TINELAB
 class SpaceRacing {
@@ -130,7 +130,7 @@ class SpaceRacing {
         
         this.setupTouchControls();
         this.setupKeyboard();
-        this.loadData();
+        this.loadData();  // ← Здесь загружаем данные
         this.renderShips();
 
         this.initAudio();
@@ -1257,19 +1257,20 @@ class SpaceRacing {
 
     // ===== N8N LEADERBOARD METHODS =====
 
-        // 1. Отправка счета и получение обновленной таблицы
-    async submitScoreToLeaderboard(finalScore) {
+    // 1. Единый метод для формирования тела запроса (исправляет путаницу с userId/user_id)
+    getPayload(finalScore = 0) {
         const user = this.tg?.initDataUnsafe?.user;
-        const playerName = user?.first_name || 'TestPlayer';
-        const userId = user?.id || 999999;
-
-        const payload = {
-            name: playerName,
-            userId: userId,
-            score: finalScore,
-            shipId: this.selectedShip
+        return {
+            userId: user?.id || 999999,
+            name: user?.first_name || user?.username || 'TestPlayer',
+            score: finalScore || this.score || 0,
+            shipId: this.selectedShip || 1
         };
+    }
 
+    // 2. Отправка счета и мгновенная отрисовка таблицы
+    async submitScoreToLeaderboard(finalScore) {
+        const payload = this.getPayload(finalScore);
         console.log('📤 Отправка счета:', payload);
 
         try {
@@ -1278,68 +1279,92 @@ class SpaceRacing {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            
-            const data = await response.json();
+
+            const text = await response.text();
+            if (!text) return;
+
+            const data = JSON.parse(text);
             console.log('✅ Ответ от n8n:', data);
-            
-            // Если пришел leaderboard — можно сразу обновить UI
+
             if (data.success && data.leaderboard) {
                 console.log('🏆 Leaderboard получен:', data.leaderboard);
+                // ДОБАВЛЕН ВЫЗОВ ОТРИСОВКИ:
+                this.renderLeaderboard(data.leaderboard);
             }
         } catch (error) {
-            console.error('❌ Ошибка:', error);
+            console.error('❌ Ошибка отправки счета:', error);
         }
     }
 
-        // 2. Получение таблицы лидеров (просто запрашиваем без данных игрока)
+    // 3. Запрос таблицы лидеров (например, по клику на вкладку)
     async fetchLeaderboard() {
-        const listContainer = document.getElementById('leaderboardList');
-        listContainer.innerHTML = '<div class="loading-spinner">LOADING...</div>';
+        const payload = this.getPayload();
 
         try {
             const response = await fetch(N8N_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get' }) // Пустой запрос для получения данных
+                body: JSON.stringify(payload)
             });
-            
-            const data = await response.json();
 
-            if (data.success && data.leaderboard && data.leaderboard.length > 0) {
-                this.renderLeaderboard(data.leaderboard);
-            } else {
-                listContainer.innerHTML = '<div class="loading-spinner">NO DATA YET</div>';
+            const text = await response.text();
+            if (!text) {
+                console.warn('⚠️ n8n вернул пустой ответ!');
+                return;
             }
-        } catch (error) {
-            console.error('❌ Ошибка загрузки:', error);
-            listContainer.innerHTML = '<div class="loading-spinner">ERROR</div>';
+
+            const data = JSON.parse(text);
+            if (data.success && data.leaderboard) {
+                this.renderLeaderboard(data.leaderboard);
+            }
+        } catch (e) {
+            console.error('❌ Ошибка загрузки:', e);
         }
     }
 
-    // 3. Отрисовка таблицы лидеров
     renderLeaderboard(data) {
         const listContainer = document.getElementById('leaderboardList');
         listContainer.innerHTML = '';
 
         const shipColors = {
-            1: '#0096FF',
-            2: '#00DC64',
-            3: '#FF00AA',
-            4: '#FFD700',
-            5: '#B400FF'
+            1: '#0096FF', 2: '#00DC64', 3: '#FF00AA',
+            4: '#FFD700', 5: '#B400FF'
         };
 
-        data.forEach(player => {
+        const shipNames = {
+            1: 'Sky Striker', 2: 'Forest Wraith', 3: 'Pink Lightning',
+            4: 'Midas Touch', 5: 'Dark Matter'
+        };
+
+        data.forEach((player, index) => {
             const row = document.createElement('div');
             row.className = `lb-row rank-${player.rank <= 3 ? player.rank : 'normal'}`;
+            row.style.setProperty('--i', index);
             
             const shipColor = shipColors[player.shipId] || '#FFFFFF';
+            const shipName = shipNames[player.shipId] || 'Unknown';
+            
+            // Вычисляем разрыв с предыдущим игроком
+            let gapText = '';
+            if (index > 0 && data[index - 1]) {
+                const gap = data[index - 1].score - player.score;
+                if (gap > 0) {
+                    gapText = `<div class="lb-gap">${gap.toLocaleString()}</div>`;
+                }
+            }
 
             row.innerHTML = `
                 <div class="lb-rank">#${player.rank}</div>
                 <div class="lb-info">
-                    <div class="lb-ship-icon" style="background: ${shipColor}; box-shadow: 0 0 10px ${shipColor}"></div>
-                    <div class="lb-name">${player.name}</div>
+                    <div class="lb-ship-icon" style="background: ${shipColor}; box-shadow: 0 0 15px ${shipColor}">
+                        <img src="./images/ship-${player.shipId}.png" alt="${shipName}" class="lb-ship-img" 
+                            onerror="this.style.display='none'; this.parentElement.innerHTML='🚀'">
+                    </div>
+                    <div class="lb-player-info">
+                        <div class="lb-name">${player.name}</div>
+                        <div class="lb-ship-name">${shipName}</div>
+                        ${gapText}
+                    </div>
                 </div>
                 <div class="lb-score">${player.score.toLocaleString()}</div>
             `;
