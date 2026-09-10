@@ -466,26 +466,43 @@ class SpaceRacing {
     
     updateCoins() {
         if (this.gameHeight < 200) return;
+        
         const playerX = this.currentShipX;
         const playerY = 85;
+        
         this.gameCoins = this.gameCoins.filter(coin => {
             if (coin.collected) return false;
+            
+            // МАГНИТ: если активен, притягиваем ВСЕ монеты на экране к кораблю
             if (this.activePowerUps.magnet) {
                 const dx = playerX - coin.x;
                 const dy = playerY - (coin.y / this.gameHeight * 100);
-                if (Math.sqrt(dx * dx + dy * dy) < 30) {
-                    coin.x += dx * 0.15;
-                    coin.y += dy * 0.15 * (this.gameHeight / 100);
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // Увеличенный радиус магнита (притягивает все монеты на экране)
+                if (distance < 100) {
+                    // Плавное ускорение притяжения
+                    const speed = 0.08 + (100 - distance) * 0.002;
+                    coin.x += dx * speed;
+                    coin.y += dy * speed * (this.gameHeight / 100);
                     coin.element.style.left = coin.x + '%';
                 }
             }
+            
             coin.y += this.gameSpeed;
             coin.element.style.top = coin.y + 'px';
+            
             const coinYPercent = (coin.y / this.gameHeight) * 100;
-            if (Math.abs(playerX - coin.x) < 12 && Math.abs(playerY - coinYPercent) < 8) {
+            
+            // Сбор монеты при столкновении
+            if (
+                Math.abs(playerX - coin.x) < 12 &&
+                Math.abs(playerY - coinYPercent) < 8
+            ) {
                 this.collectCoin(coin);
                 return false;
             }
+            
             return coin.y < this.gameHeight + 100;
         });
     }
@@ -653,9 +670,14 @@ class SpaceRacing {
     
     updateCoinDisplay() {
         const coinCount = document.getElementById('coinCount');
+        const shopCoinCount = document.getElementById('shopCoinCount');
         const gameCoins = document.getElementById('gameCoins');
+        
         if (coinCount) coinCount.textContent = this.coins;
+        if (shopCoinCount) shopCoinCount.textContent = this.coins; // <-- ВАЖНО!
         if (gameCoins) gameCoins.textContent = this.coins;
+        
+        console.log('💰 Обновлен баланс:', this.coins); // <-- Добавь для отладки
     }
     
     saveData() {
@@ -669,7 +691,7 @@ class SpaceRacing {
         if (data) {
             try {
                 const parsed = JSON.parse(data);
-                this.coins = (parsed.coins !== undefined && parsed.coins !== null) ? parsed.coins : 0; 
+                this.coins = (parsed.coins !== undefined && parsed.coins !== null) ? parsed.coins : 0;
                 this.selectedShip = parsed.selectedShip || 1;
                 this.level = parsed.level || 1;
                 this.audioEnabled = parsed.audioEnabled !== undefined ? parsed.audioEnabled : true;
@@ -680,12 +702,16 @@ class SpaceRacing {
                         if (this.ships[id]) this.ships[id].unlocked = parsed.ships[id].unlocked;
                     });
                 }
-                this.updateCoinDisplay();
+                
+                this.updateCoinDisplay(); // <-- ДОЛЖЕН БЫТЬ ЗДЕСЬ!
                 this.updateShipAppearance();
                 this.updateSoundButton();
                 this.checkLanguage();
+                
+                console.log('💾 Загружен баланс из сохранения:', this.coins);
             } catch(e) { console.error('Error loading data', e); }
         } else {
+            this.updateCoinDisplay(); // <-- И ЗДЕСЬ!
             this.updateSoundButton();
             this.checkLanguage();
         }
