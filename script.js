@@ -2,6 +2,22 @@
 // ===== N8N CONFIGURATION =====
 const N8N_URL = 'https://tiktiok.xyz/webhook/get-leaderboard';
 
+// ===== НАСТРОЙКИ КОНКУРСА =====
+const ADMIN_USER_ID = 999999; // Твой Telegram ID (замени на свой!)
+const CONTEST_DURATION_DAYS = 7;
+
+// Проверяем, есть ли сохранённая дата окончания, если нет — создаём
+let contestEndDate = localStorage.getItem('contestEndDate');
+if (!contestEndDate) {
+    const now = new Date();
+    now.setDate(now.getDate() + CONTEST_DURATION_DAYS);
+    contestEndDate = now.toISOString();
+    localStorage.setItem('contestEndDate', contestEndDate);
+    console.log('🏆 Конкурс запущен! Окончание:', contestEndDate);
+}
+
+const contestEndTime = new Date(contestEndDate).getTime();
+
 // SpaceRacing Game - Created by TINELAB
 class SpaceRacing {
     constructor() {
@@ -683,9 +699,6 @@ class SpaceRacing {
         
         this.gameSpeed = this.baseGameSpeed + (this.level * 0.5) + (this.distance * 0.002);
         
-        // Обновление UI целей
-        this.updateLevelUI();
-        
         // Обновление таймеров пауэрапов
         this.updatePowerUpTimers();
         
@@ -708,11 +721,6 @@ class SpaceRacing {
         this.updateCoins();
         this.updatePowerUps();
         
-        // Проверка выполнения целей уровня
-        const obj = this.levelObjectives[this.level] || this.levelObjectives[5];
-        if (this.distance >= obj.distance && this.levelCoins >= obj.coins) {
-            this.levelComplete();
-        }
     }
 
     spawnObstacle() {
@@ -1084,20 +1092,6 @@ class SpaceRacing {
         this.saveData();
     }
     
-    levelComplete() {
-        this.isPlaying = false;
-        this.levelCompleted = false;  // ← Сбрасываем флаг
-        this.level++;
-        this.coins += 300;
-        this.updateCoinDisplay();
-        this.showScreen('levelComplete');
-        this.saveData();
-    }
-    
-    nextLevel() {
-        this.startGame();
-    }
-    
     togglePause() {
         if (!this.isPlaying) return; // Не паузим если игра не идет
         
@@ -1336,37 +1330,41 @@ class SpaceRacing {
             4: 'Midas Touch', 5: 'Dark Matter'
         };
 
+        const formatNumber = (num) => {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
+        };
+
         data.forEach((player, index) => {
             const row = document.createElement('div');
             row.className = `lb-row rank-${player.rank <= 3 ? player.rank : 'normal'}`;
-            row.style.setProperty('--i', index);
             
             const shipColor = shipColors[player.shipId] || '#FFFFFF';
             const shipName = shipNames[player.shipId] || 'Unknown';
-            
+
             // Вычисляем разрыв с предыдущим игроком
-            let gapText = '';
+            let gapHtml = '';
             if (index > 0 && data[index - 1]) {
                 const gap = data[index - 1].score - player.score;
                 if (gap > 0) {
-                    gapText = `<div class="lb-gap">${gap.toLocaleString()}</div>`;
+                    gapHtml = `<span class="lb-gap">↑${formatNumber(gap)}</span>`;
                 }
             }
 
             row.innerHTML = `
                 <div class="lb-rank">#${player.rank}</div>
                 <div class="lb-info">
-                    <div class="lb-ship-icon" style="background: ${shipColor}; box-shadow: 0 0 15px ${shipColor}">
+                    <div class="lb-ship-icon" style="background: ${shipColor}" title="${shipName}">
                         <img src="./images/ship-${player.shipId}.png" alt="${shipName}" class="lb-ship-img" 
                             onerror="this.style.display='none'; this.parentElement.innerHTML='🚀'">
                     </div>
-                    <div class="lb-player-info">
+                    <div class="lb-player-data">
                         <div class="lb-name">${player.name}</div>
-                        <div class="lb-ship-name">${shipName}</div>
-                        ${gapText}
+                        ${gapHtml}
                     </div>
                 </div>
-                <div class="lb-score">${player.score.toLocaleString()}</div>
+                <div class="lb-score">${formatNumber(player.score)}</div>
             `;
 
             listContainer.appendChild(row);

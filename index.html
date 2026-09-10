@@ -87,15 +87,43 @@
             <!-- Вкладка: ТОП -->
             <div class="tab-content" id="tab-top">
                 <div class="top-header">
-                    <h2>🏆 LEADERBOARD</h2>
+                    <h2> LEADERBOARD 🏆</h2>
                     <p class="top-subtitle">Best pilots of the galaxy</p>
                 </div>
+                
+                <!-- ТАЙМЕР КОНКУРСА -->
+                <div class="contest-timer" id="contestTimer">
+                    <div class="timer-label">🔥 CONTEST ENDS IN </div>
+                    <div class="timer-display" id="timerDisplay">
+                        <div class="timer-block">
+                            <span class="timer-value" id="timerDays">00</span>
+                            <span class="timer-unit">DAYS</span>
+                        </div>
+                        <div class="timer-separator">:</div>
+                        <div class="timer-block">
+                            <span class="timer-value" id="timerHours">00</span>
+                            <span class="timer-unit">HOURS</span>
+                        </div>
+                        <div class="timer-separator">:</div>
+                        <div class="timer-block">
+                            <span class="timer-value" id="timerMinutes">00</span>
+                            <span class="timer-unit">MIN</span>
+                        </div>
+                        <div class="timer-separator">:</div>
+                        <div class="timer-block">
+                            <span class="timer-value" id="timerSeconds">00</span>
+                            <span class="timer-unit">SEC</span>
+                        </div>
+                    </div>
+                    <div class="timer-status" id="timerStatus"></div>
+                </div>
+                
                 <div class="leaderboard-list" id="leaderboardList">
                     <div class="loading-spinner">Loading...</div>
                 </div>
             </div>
 
-            <!-- Вкладка: ПРОФИЛЬ (Перемещена внутрь main-menu) -->
+            <!-- Вкладка: ПРОФИЛЬ -->
             <div class="tab-content" id="tab-profile">
                 <div class="profile-header">
                     <div class="profile-avatar">
@@ -173,6 +201,16 @@
                         </svg>
                         <span>RESET PROGRESS</span>
                     </button>
+
+                    <!-- КНОПКА АДМИН-ПАНЕЛИ (Скрыта по умолчанию, JS покажет её только тебе) -->
+                    <button id="adminPanelButton" class="btn-admin-panel" onclick="game.openAdminPanel()" style="display: none;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF00FF" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                            <path d="M2 17l10 5 10-5"></path>
+                            <path d="M2 12l10 5 10-5"></path>
+                        </svg>
+                        <span>ADMIN PANEL</span>
+                    </button>
                 </div>
             </div>
 
@@ -234,12 +272,6 @@
                     <div class="stars-game"></div>
                 </div>
 
-                <!-- Цели уровня -->
-                <div class="level-objectives" id="levelObjectives">
-                    <span>🎯 DIST: <span id="objDist">0/1000</span></span>
-                    <span>🪙 COINS: <span id="objCoins">0/15</span></span>
-                </div>
-
                 <!-- Игровые объекты -->
                 <div class="player-ship" id="playerShip"></div>
                 <div class="obstacles-container" id="obstacles"></div>
@@ -296,28 +328,50 @@
             </div>
         </div>
 
-        <!-- 7. Level Complete -->
-        <div class="screen level-complete" id="levelComplete">
-            <div class="complete-content">
-                <div class="stars-reward">
-                    <div class="star big"></div>
-                    <div class="star big"></div>
-                    <div class="star big"></div>
+    </div> <!-- Конец div id="app" -->
+
+    <!-- МОДАЛЬНОЕ ОКНО АДМИН-ПАНЕЛИ -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content admin-modal">
+            <div class="modal-header">
+                <h2>⚙️ ADMIN PANEL</h2>
+                <button class="modal-close" onclick="game.closeAdminPanel()">×</button>
+            </div>
+            
+            <div class="admin-section">
+                <h3>🏆 CONTEST STATUS</h3>
+                <div class="admin-info" id="contestStatusInfo">
+                    <!-- Заполняется через JS -->
                 </div>
-                <h2>LEVEL COMPLETE!</h2>
-                <div class="reward-box">
-                    <div class="box-icon">🎁</div>
-                    <span>YOU GOT A REWARD</span>
+            </div>
+            
+            <div class="admin-section">
+                <h3>⏱️ TIMER CONTROL</h3>
+                <div class="admin-controls">
+                    <button class="btn-admin-control" onclick="game.extendContest(1)">+1 Day</button>
+                    <button class="btn-admin-control" onclick="game.extendContest(3)">+3 Days</button>
+                    <button class="btn-admin-control" onclick="game.extendContest(7)">+7 Days</button>
+                    <button class="btn-admin-control danger" onclick="game.resetContestTimer()">Reset Timer</button>
                 </div>
-                <div class="reward-coins">
-                    <span class="coin-icon">🪙</span>
-                    <span>+300</span>
+            </div>
+            
+            <div class="admin-section">
+                <h3>🎮 CONTEST ACTIONS</h3>
+                <div class="admin-controls">
+                    <button class="btn-admin-control" onclick="game.pauseContest()">Pause Contest</button>
+                    <button class="btn-admin-control" onclick="game.resumeContest()">Resume Contest</button>
+                    <button class="btn-admin-control danger" onclick="game.endContest()">End Contest Now</button>
                 </div>
-                <button class="btn-next" onclick="game.nextLevel()">NEXT</button>
+            </div>
+            
+            <div class="admin-section">
+                <h3>📊 STATISTICS</h3>
+                <div class="admin-stats" id="adminStats">
+                    <!-- Заполняется через JS -->
+                </div>
             </div>
         </div>
-
-    </div> <!-- Конец div id="app" -->
+    </div>
 
     <script src="script.js"></script>
 </body>
