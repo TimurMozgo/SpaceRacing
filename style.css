@@ -1817,7 +1817,6 @@ body {
     gap: 10px;
 }
 
-
 /* Заголовок SELECT SPACESHIP */
 .shop-header {
     display: flex;
@@ -1827,24 +1826,36 @@ body {
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 15px; /* Добавляем отступ между заголовком и монетами */
 }
 
 .shop-header h2 {
-    flex: 1;
+    flex: 1; /* Заголовок занимает доступное пространство */
     text-align: center;
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.3em;
+    font-size: 1.2em; /* Немного уменьшаем шрифт */
     color: #FFFFFF;
     letter-spacing: 2px;
     margin: 0;
 }
 
-/* Центрируем валюту в шапке магазина */
+/* Убираем absolute positioning — пусть flexbox работает */
 .shop-header .currency {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 15px;
+    background: rgba(255, 215, 0, 0.1); /* Золотой фон для монет */
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 20px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    color: #FFD700;
+    white-space: nowrap; /* Чтобы текст не переносился */
+}
+
+.shop-header .coin-icon {
+    font-size: 1.2em;
 }
 
 /* ===== ПРОФИЛЬ ===== */

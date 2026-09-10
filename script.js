@@ -12,7 +12,7 @@ if (!contestEndDate) {
     contestEndDate = now.toISOString();
     localStorage.setItem('contestEndDate', contestEndDate);
 }
-const contestEndTime = new Date(contestEndDate).getTime();
+let contestEndTime = new Date(contestEndDate).getTime(); // <-- ЗАМЕНИ const НА let
 
 // SpaceRacing Game - Created by TINELAB
 class SpaceRacing {
@@ -20,7 +20,7 @@ class SpaceRacing {
         this.tg = window.Telegram.WebApp;
         this.currentScreen = 'start';
         this.score = 0;
-        this.coins = 1500;
+        this.coins = 0;
         this.selectedShip = 1;
         this.baseGameSpeed = 3;
         this.gameSpeed = 3;
@@ -669,7 +669,7 @@ class SpaceRacing {
         if (data) {
             try {
                 const parsed = JSON.parse(data);
-                this.coins = (parsed.coins !== undefined && parsed.coins !== null) ? parsed.coins : 1500;
+                this.coins = (parsed.coins !== undefined && parsed.coins !== null) ? parsed.coins : 0; 
                 this.selectedShip = parsed.selectedShip || 1;
                 this.level = parsed.level || 1;
                 this.audioEnabled = parsed.audioEnabled !== undefined ? parsed.audioEnabled : true;
